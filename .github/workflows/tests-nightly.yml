@@ -36,6 +36,7 @@ jobs:
   revert-automation-env-to-snap:
     if: github.event.inputs.environment == null
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
 
       - name: Setup Node
@@ -68,7 +69,7 @@ jobs:
       - name: revert snapshot
         env:
           SALEOR_CLI_ENV: staging
-        run: npx saleor backup restore MbdG5UXd
+        run: npx saleor backup restore MbdG5UXd --skip_webhooks_update
 
       - name: Notify Slack
         if: ${{ failure() }}
@@ -116,7 +117,7 @@ jobs:
 
       - name: Cypress run
         if: ${{ github.event.inputs.tests != 'Critical' }}
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           API_URI: ${{ steps.get-env-uri.outputs.ENV_URI }}graphql/
           APP_MOUNT_URI: ${{ secrets.APP_MOUNT_URI }}
@@ -127,14 +128,15 @@ jobs:
           CYPRESS_PERMISSIONS_USERS_PASSWORD: ${{ secrets.CYPRESS_PERMISSIONS_USERS_PASSWORD }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_INFO_MESSAGE: All tests triggered via ${{ github.event.action }} on ${{ steps.get-env-uri.outputs.ENV_URI }}
         with:
           parallel: true
           group: 'UI - Chrome'
-          command: npm run cy:run:allEnv:parallel
+          command: npx cypress run --record --env tags=all --parallel --tag ${{ steps.get-env-uri.outputs.ENV_URI }}, All_Tests
 
       - name: Cypress run
         if: ${{ github.event.inputs.tests == 'Critical' }}
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           API_URI: ${{ steps.get-env-uri.outputs.ENV_URI }}graphql/
           APP_MOUNT_URI: ${{ secrets.APP_MOUNT_URI }}
@@ -145,10 +147,11 @@ jobs:
           CYPRESS_PERMISSIONS_USERS_PASSWORD: ${{ secrets.CYPRESS_PERMISSIONS_USERS_PASSWORD }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_INFO_MESSAGE: Critical tests triggered via ${{ github.event.action }} on ${{ steps.get-env-uri.outputs.ENV_URI }}
         with:
           parallel: true
           group: 'UI - Chrome'
-          command: npm run cy:run:critical:parallel
+          command: npx cypress run --record --env tags=critical --spec cypress/e2e/navigation.js,cypress/e2e/products/createProduct.js,cypress/e2e/products/productsVariants.js  --parallel --tag ${{ steps.get-env-uri.outputs.ENV_URI }}, Critical, ${{ github.event.action }}
 
 
 
