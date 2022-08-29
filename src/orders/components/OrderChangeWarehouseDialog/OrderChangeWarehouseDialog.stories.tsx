@@ -1,6 +1,6 @@
 import { MockedProvider, MockedResponse } from "@apollo/client/testing";
 import { allPermissions } from "@saleor/hooks/makeQuery";
-import { order, warehouseSearch } from "@saleor/orders/fixtures";
+import { fulfillOrderLine, warehouseSearch } from "@saleor/orders/fixtures";
 import { searchWarehouses } from "@saleor/searches/useWarehouseSearch";
 import Decorator from "@saleor/storybook/Decorator";
 import { storiesOf } from "@storybook/react";
@@ -10,10 +10,10 @@ import OrderChangeWarehouseDialog, { OrderChangeWarehouseDialogProps } from ".";
 
 const props: OrderChangeWarehouseDialogProps = {
   open: true,
-  lines: order("abc").lines,
-  currentWarehouse: null,
+  line: fulfillOrderLine("abc"),
+  currentWarehouseId: null,
   onConfirm: () => null,
-  onClose: () => null
+  onClose: () => null,
 };
 
 const mocks: MockedResponse[] = [
@@ -24,18 +24,18 @@ const mocks: MockedResponse[] = [
         first: 20,
         after: null,
         query: "",
-        ...allPermissions
-      }
+        ...allPermissions,
+      },
     },
     result: {
-      data: { search: warehouseSearch }
-    }
-  }
+      data: { search: warehouseSearch },
+    },
+  },
 ];
 
 storiesOf(
   "Orders / Order details fulfillment warehouse selection modal",
-  module
+  module,
 )
   .addDecorator(Decorator)
   .add("default", () => (

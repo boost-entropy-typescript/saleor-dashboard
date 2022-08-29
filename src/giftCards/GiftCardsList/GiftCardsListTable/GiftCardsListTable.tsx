@@ -3,7 +3,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import HorizontalSpacer from "@saleor/apps/components/HorizontalSpacer";
 import Checkbox from "@saleor/components/Checkbox";
@@ -47,7 +47,7 @@ const GiftCardsListTable: React.FC = () => {
     isSelected,
     giftCards,
     numberOfColumns,
-    params
+    params,
   } = useGiftCardList();
   const { openDeleteDialog } = useGiftCardListDialogs();
 
@@ -58,15 +58,11 @@ const GiftCardsListTable: React.FC = () => {
       navigate(
         giftCardListUrl({
           ...params,
-          sort: GiftCardUrlSortField.usedBy
-        })
+          sort: GiftCardUrlSortField.usedBy,
+        }),
       );
     }
   });
-
-  const onLinkClick: React.MouseEventHandler = event => {
-    event.stopPropagation();
-  };
 
   return (
     <Card>
@@ -101,7 +97,7 @@ const GiftCardsListTable: React.FC = () => {
                 usedByEmail,
                 tags,
                 product,
-                currentBalance
+                currentBalance,
               } = giftCard;
 
               return (
@@ -125,7 +121,7 @@ const GiftCardsListTable: React.FC = () => {
                     <div className={classes.cardCodeContainer}>
                       <Typography>
                         {intl.formatMessage(messages.codeEndingWithLabel, {
-                          last4CodeChars
+                          last4CodeChars,
                         })}
                       </Typography>
                       <>
@@ -141,9 +137,13 @@ const GiftCardsListTable: React.FC = () => {
                     {product ? (
                       <TableButtonWrapper>
                         <PillLink
+                          className={classes.pill}
                           component={RouterLink}
                           to={productUrl(product?.id)}
-                          onClick={onLinkClick}
+                          onClick={event => {
+                            event.stopPropagation();
+                            navigate(productUrl(product?.id));
+                          }}
                         >
                           {product?.name}
                         </PillLink>
@@ -185,7 +185,7 @@ const GiftCardsListTable: React.FC = () => {
                   <FormattedMessage {...messages.noGiftCardsFound} />
                 </TableCell>
               </TableRow>
-            )
+            ),
           )}
         </TableBody>
       </ResponsiveTable>

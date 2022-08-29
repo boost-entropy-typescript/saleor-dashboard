@@ -9,11 +9,11 @@ import {
   TableCell,
   TableRow,
   TextField,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import Debounce from "@saleor/components/Debounce";
 import Skeleton from "@saleor/components/Skeleton";
-import { OrderLineFragment, WarehouseFragment } from "@saleor/graphql";
+import { OrderFulfillLineFragment, WarehouseFragment } from "@saleor/graphql";
 import { buttonMessages } from "@saleor/intl";
 import {
   Button,
@@ -23,9 +23,9 @@ import {
   isScrolledToTop,
   ScrollShadow,
   SearchIcon,
-  useElementScroll
+  useElementScroll,
 } from "@saleor/macaw-ui";
-import { isLineAvailableInWarehouse } from "@saleor/orders/utils/data";
+import { getLineAvailableQuantityInWarehouse } from "@saleor/orders/utils/data";
 import useWarehouseSearch from "@saleor/searches/useWarehouseSearch";
 import { mapEdgesToItems } from "@saleor/utils/maps";
 import React from "react";
@@ -37,18 +37,18 @@ import { useStyles } from "./styles";
 
 export interface OrderChangeWarehouseDialogProps {
   open: boolean;
-  lines: OrderLineFragment[];
-  currentWarehouse: WarehouseFragment;
+  line: OrderFulfillLineFragment;
+  currentWarehouseId: string;
   onConfirm: (warehouse: WarehouseFragment) => void;
   onClose();
 }
 
 export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProps> = ({
   open,
-  lines,
-  currentWarehouse,
+  line,
+  currentWarehouseId,
   onConfirm,
-  onClose
+  onClose,
 }) => {
   const classes = useStyles();
   const intl = useIntl();
@@ -63,22 +63,22 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
   >(null);
 
   React.useEffect(() => {
-    if (currentWarehouse?.id) {
-      setSelectedWarehouseId(currentWarehouse.id);
+    if (currentWarehouseId) {
+      setSelectedWarehouseId(currentWarehouseId);
     }
-  }, [currentWarehouse]);
+  }, [currentWarehouseId]);
 
   const { result: warehousesOpts, loadMore, search } = useWarehouseSearch({
     variables: {
       after: null,
       first: 20,
-      query: ""
-    }
+      query: "",
+    },
   });
   const filteredWarehouses = mapEdgesToItems(warehousesOpts?.data?.search);
 
   const selectedWarehouse = filteredWarehouses?.find(
-    getById(selectedWarehouseId ?? "")
+    getById(selectedWarehouseId ?? ""),
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,11 +103,16 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
         </DialogHeader>
 
         <DialogContent className={classes.container}>
-          <FormattedMessage {...messages.dialogDescription} />
+          <FormattedMessage
+            {...messages.dialogDescription}
+            values={{
+              productName: line?.productName,
+            }}
+          />
           <Debounce debounceFn={search}>
             {debounceSearchChange => {
               const handleSearchChange = (
-                event: React.ChangeEvent<HTMLInputElement>
+                event: React.ChangeEvent<HTMLInputElement>,
               ) => {
                 const value = event.target.value;
                 setQuery(value);
@@ -120,7 +125,7 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
                   variant="outlined"
                   onChange={handleSearchChange}
                   placeholder={intl.formatMessage(
-                    messages.searchFieldPlaceholder
+                    messages.searchFieldPlaceholder,
                   )}
                   fullWidth
                   InputProps={{
@@ -128,7 +133,7 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
                       <InputAdornment position="start">
                         <SearchIcon />
                       </InputAdornment>
-                    )
+                    ),
                   }}
                   inputProps={{ className: classes.searchInput }}
                 />
@@ -144,15 +149,19 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
 
       <DialogTable ref={setAnchor}>
         {filteredWarehouses ? (
-          <RadioGroup value={selectedWarehouseId} onChange={handleChange}>
+          <RadioGroup
+            value={selectedWarehouseId}
+            onChange={handleChange}
+            className={classes.tableBody}
+          >
             {filteredWarehouses.map(warehouse => {
-              const unavailableLines = lines?.filter(
-                line => !isLineAvailableInWarehouse(line, warehouse)
+              const lineQuantityInWarehouse = getLineAvailableQuantityInWarehouse(
+                line,
+                warehouse,
               );
-              const someLinesUnavailable = unavailableLines?.length > 0;
               return (
                 <TableRow key={warehouse.id}>
-                  <TableCell>
+                  <TableCell className={classes.tableCell}>
                     <FormControlLabel
                       value={warehouse.id}
                       control={<Radio color="primary" />}
@@ -161,28 +170,20 @@ export const OrderChangeWarehouseDialog: React.FC<OrderChangeWarehouseDialogProp
                           <span className={classes.warehouseName}>
                             {warehouse.name}
                           </span>
-                          {someLinesUnavailable && (
-                            <Typography className={classes.supportText}>
-                              {unavailableLines.length === 1
-                                ? intl.formatMessage(
-                                    messages.productUnavailable,
-                                    {
-                                      productName:
-                                        unavailableLines[0].productName
-                                    }
-                                  )
-                                : intl.formatMessage(
-                                    messages.multipleProductsUnavailable,
-                                    { productCount: unavailableLines.length }
-                                  )}
-                            </Typography>
-                          )}
+                          <Typography className={classes.supportText}>
+                            <FormattedMessage
+                              {...messages.productAvailability}
+                              values={{
+                                productCount: lineQuantityInWarehouse,
+                              }}
+                            />
+                          </Typography>
                         </div>
                       }
                     />
-                    {currentWarehouse?.id === warehouse?.id && (
+                    {currentWarehouseId === warehouse?.id && (
                       <Typography className={classes.helpText}>
-                        {intl.formatMessage(messages.currentSelection)}
+                        <FormattedMessage {...messages.currentSelection} />
                       </Typography>
                     )}
                   </TableCell>

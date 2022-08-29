@@ -2,6 +2,7 @@ import { Accordion, AccordionSummary, Typography } from "@material-ui/core";
 import { ChannelData } from "@saleor/channels/utils";
 import IconChevronDown from "@saleor/icons/ChevronDown";
 import { makeStyles } from "@saleor/macaw-ui";
+import Label from "@saleor/orders/components/OrderHistory/Label";
 import React from "react";
 
 import { Messages } from "../types";
@@ -16,16 +17,16 @@ const useExpanderStyles = makeStyles(
       paddingBottom: theme.spacing(2),
 
       "&:before": {
-        content: "none"
+        content: "none",
       },
 
       "&$expanded": {
         margin: 0,
-        border: "none"
-      }
-    }
+        border: "none",
+      },
+    },
   }),
-  { name: "ChannelContentWrapperExpander" }
+  { name: "ChannelContentWrapperExpander" },
 );
 
 const useSummaryStyles = makeStyles(
@@ -41,18 +42,28 @@ const useSummaryStyles = makeStyles(
 
       "&$expanded": {
         minHeight: 0,
-        padding: theme.spacing(2, 0)
-      }
+        padding: theme.spacing(2, 0),
+      },
     },
     content: {
       margin: 0,
 
       "&$expanded": {
-        margin: 0
-      }
-    }
+        margin: 0,
+      },
+    },
   }),
-  { name: "ChannelContentWrapperExpanderSummary" }
+  { name: "ChannelContentWrapperExpanderSummary" },
+);
+
+const useStyles = makeStyles(
+  () => ({
+    container: {
+      display: "flex",
+      flexDirection: "column",
+    },
+  }),
+  { name: "ChannelWithVariantAvailabilityItemWrapper" },
 );
 
 export interface ChannelContentWrapperProps {
@@ -64,10 +75,11 @@ export interface ChannelContentWrapperProps {
 const ChannelContentWrapper: React.FC<ChannelContentWrapperProps> = ({
   data,
   messages,
-  children
+  children,
 }) => {
-  const expanderClasses = useExpanderStyles({});
-  const summaryClasses = useSummaryStyles({});
+  const expanderClasses = useExpanderStyles();
+  const summaryClasses = useSummaryStyles();
+  const classes = useStyles();
 
   const { name } = data;
 
@@ -80,8 +92,10 @@ const ChannelContentWrapper: React.FC<ChannelContentWrapperProps> = ({
         expandIcon={<IconChevronDown />}
         classes={summaryClasses}
       >
-        <Typography>{name}</Typography>
-        <Typography variant="caption">{messages.availableDateText}</Typography>
+        <div className={classes.container}>
+          <Typography>{name}</Typography>
+          <Label text={messages.availableDateText} />
+        </div>
       </AccordionSummary>
       {children}
     </Accordion>

@@ -7,24 +7,23 @@ import {
   FulfillmentStatus,
   OrderDetailsFragment,
   OrderFulfillLineFragment,
-  OrderFulfillStockInput,
   OrderLineFragment,
   OrderLineStockDataFragment,
   OrderRefundDataQuery,
   StockFragment,
-  WarehouseFragment
+  WarehouseFragment,
 } from "@saleor/graphql";
 import { FormsetData } from "@saleor/hooks/useFormset";
 import { findInEnum } from "@saleor/misc";
 
 import {
   LineItemData,
-  OrderReturnFormData
+  OrderReturnFormData,
 } from "../components/OrderReturnPage/form";
 import {
   getAllOrderFulfilledLines,
   getAllOrderWaitingLines,
-  getById
+  getById,
 } from "../components/OrderReturnPage/utils";
 
 export type OrderWithTotalAndTotalCaptured = Pick<
@@ -52,14 +51,14 @@ export function getWarehousesFromOrderLines<
           warehouses.some(getById(stock.warehouse.id))
             ? warehouses
             : [...warehouses, stock.warehouse],
-        warehouses
+        warehouses,
       ),
-    [] as WarehouseFragment[]
+    [] as WarehouseFragment[],
   );
 }
 
 export function getPreviouslyRefundedPrice(
-  order: OrderWithTotalAndTotalCaptured
+  order: OrderWithTotalAndTotalCaptured,
 ): IMoney {
   return (
     order?.totalCaptured &&
@@ -71,7 +70,7 @@ export function getPreviouslyRefundedPrice(
 const getItemPriceAndQuantity = ({
   orderLines,
   itemsQuantities,
-  id
+  id,
 }: {
   orderLines: OrderLineFragment[];
   itemsQuantities: FormsetData<LineItemData, number>;
@@ -96,29 +95,29 @@ const selectItemPriceAndQuantity = (
   {
     fulfilledItemsQuantities,
     waitingItemsQuantities,
-    unfulfilledItemsQuantities
+    unfulfilledItemsQuantities,
   }: Partial<OrderReturnFormData>,
   id: string,
-  isFulfillment: boolean
+  isFulfillment: boolean,
 ) => {
   const fulfillment = getFulfillmentByFulfillmentLineId(order, id);
   if (fulfillment?.status === FulfillmentStatus.WAITING_FOR_APPROVAL) {
     return getItemPriceAndQuantity({
       id,
       itemsQuantities: waitingItemsQuantities,
-      orderLines: getAllOrderWaitingLines(order)
+      orderLines: getAllOrderWaitingLines(order),
     });
   }
   return isFulfillment
     ? getItemPriceAndQuantity({
         id,
         itemsQuantities: fulfilledItemsQuantities,
-        orderLines: getAllOrderFulfilledLines(order)
+        orderLines: getAllOrderFulfilledLines(order),
       })
     : getItemPriceAndQuantity({
         id,
         itemsQuantities: unfulfilledItemsQuantities,
-        orderLines: order.lines
+        orderLines: order.lines,
       });
 };
 
@@ -128,8 +127,8 @@ export const getReplacedProductsAmount = (
     itemsToBeReplaced,
     unfulfilledItemsQuantities,
     waitingItemsQuantities,
-    fulfilledItemsQuantities
-  }: Partial<OrderReturnFormData>
+    fulfilledItemsQuantities,
+  }: Partial<OrderReturnFormData>,
 ) => {
   if (!order || !itemsToBeReplaced.length) {
     return 0;
@@ -138,7 +137,7 @@ export const getReplacedProductsAmount = (
   return itemsToBeReplaced.reduce(
     (
       resultAmount: number,
-      { id, value: isItemToBeReplaced, data: { isFulfillment, isRefunded } }
+      { id, value: isItemToBeReplaced, data: { isFulfillment, isRefunded } },
     ) => {
       if (!isItemToBeReplaced || isRefunded) {
         return resultAmount;
@@ -149,15 +148,15 @@ export const getReplacedProductsAmount = (
         {
           fulfilledItemsQuantities,
           waitingItemsQuantities,
-          unfulfilledItemsQuantities
+          unfulfilledItemsQuantities,
         },
         id,
-        isFulfillment
+        isFulfillment,
       );
 
       return resultAmount + unitPrice?.gross?.amount * selectedQuantity;
     },
-    0
+    0,
   );
 };
 
@@ -167,8 +166,8 @@ export const getReturnSelectedProductsAmount = (
     itemsToBeReplaced,
     waitingItemsQuantities,
     unfulfilledItemsQuantities,
-    fulfilledItemsQuantities
-  }
+    fulfilledItemsQuantities,
+  },
 ) => {
   if (!order) {
     return 0;
@@ -177,19 +176,19 @@ export const getReturnSelectedProductsAmount = (
   const unfulfilledItemsValue = getPartialProductsValue({
     itemsQuantities: unfulfilledItemsQuantities,
     itemsToBeReplaced,
-    orderLines: order.lines
+    orderLines: order.lines,
   });
 
   const fulfiledItemsValue = getPartialProductsValue({
     itemsQuantities: fulfilledItemsQuantities,
     itemsToBeReplaced,
-    orderLines: getAllOrderFulfilledLines(order)
+    orderLines: getAllOrderFulfilledLines(order),
   });
 
   const waitingItemsValue = getPartialProductsValue({
     itemsQuantities: waitingItemsQuantities,
     itemsToBeReplaced,
-    orderLines: getAllOrderWaitingLines(order)
+    orderLines: getAllOrderWaitingLines(order),
   });
 
   return unfulfilledItemsValue + fulfiledItemsValue + waitingItemsValue;
@@ -198,7 +197,7 @@ export const getReturnSelectedProductsAmount = (
 const getPartialProductsValue = ({
   orderLines,
   itemsQuantities,
-  itemsToBeReplaced
+  itemsToBeReplaced,
 }: {
   itemsToBeReplaced: FormsetData<LineItemData, boolean>;
   itemsQuantities: FormsetData<LineItemData, number>;
@@ -215,21 +214,21 @@ const getPartialProductsValue = ({
       const { selectedQuantity, unitPrice } = getItemPriceAndQuantity({
         id,
         itemsQuantities,
-        orderLines
+        orderLines,
       });
 
       return resultAmount + unitPrice.gross.amount * selectedQuantity;
     },
-    0
+    0,
   );
 
 export function getRefundedLinesPriceSum(
   lines: OrderRefundDataQuery["order"]["lines"],
-  refundedProductQuantities: FormsetData<null, string | number>
+  refundedProductQuantities: FormsetData<null, string | number>,
 ): number {
   return lines?.reduce((sum, line) => {
     const refundedLine = refundedProductQuantities.find(
-      refundedLine => refundedLine.id === line.id
+      refundedLine => refundedLine.id === line.id,
     );
     return sum + line.unitPrice.gross.amount * Number(refundedLine?.value || 0);
   }, 0);
@@ -237,12 +236,12 @@ export function getRefundedLinesPriceSum(
 
 export function getAllFulfillmentLinesPriceSum(
   fulfillments: OrderRefundDataQuery["order"]["fulfillments"],
-  refundedFulfilledProductQuantities: FormsetData<null, string | number>
+  refundedFulfilledProductQuantities: FormsetData<null, string | number>,
 ): number {
   return fulfillments?.reduce((sum, fulfillment) => {
     const fulfilmentLinesSum = fulfillment?.lines.reduce((sum, line) => {
       const refundedLine = refundedFulfilledProductQuantities.find(
-        refundedLine => refundedLine.id === line.id
+        refundedLine => refundedLine.id === line.id,
       );
       return (
         sum +
@@ -254,11 +253,11 @@ export function getAllFulfillmentLinesPriceSum(
 }
 
 export function mergeRepeatedOrderLines(
-  fulfillmentLines: OrderDetailsFragment["fulfillments"][0]["lines"]
+  fulfillmentLines: OrderDetailsFragment["fulfillments"][0]["lines"],
 ) {
   return fulfillmentLines.reduce((prev, curr) => {
     const existingOrderLineIndex = prev.findIndex(
-      prevLine => prevLine.orderLine.id === curr.orderLine.id
+      prevLine => prevLine.orderLine.id === curr.orderLine.id,
     );
 
     if (existingOrderLineIndex === -1) {
@@ -268,7 +267,7 @@ export function mergeRepeatedOrderLines(
 
       prev[existingOrderLineIndex] = {
         ...existingOrderLine,
-        quantity: existingOrderLine.quantity + curr.quantity
+        quantity: existingOrderLine.quantity + curr.quantity,
       };
     }
 
@@ -277,17 +276,17 @@ export function mergeRepeatedOrderLines(
 }
 
 export function addressToAddressInput<T>(
-  address: T & AddressFragment
+  address: T & AddressFragment,
 ): AddressInput {
   const { id, __typename, ...rest } = address;
   return {
     ...rest,
-    country: findInEnum(address.country.code, CountryCode)
+    country: findInEnum(address.country.code, CountryCode),
   };
 }
 
 export const getVariantSearchAddress = (
-  order: OrderDetailsFragment
+  order: OrderDetailsFragment,
 ): AddressInput => {
   if (order.shippingAddress) {
     return addressToAddressInput(order.shippingAddress);
@@ -302,24 +301,24 @@ export const getVariantSearchAddress = (
 
 export const getAllocatedQuantityForLine = (
   line: OrderLineStockDataFragment,
-  warehouseId: string
+  warehouseId: string,
 ) => {
   const warehouseAllocation = line.allocations.find(
-    allocation => allocation.warehouse.id === warehouseId
+    allocation => allocation.warehouse.id === warehouseId,
   );
   return warehouseAllocation?.quantity || 0;
 };
 
 export const getOrderLineAvailableQuantity = (
   line: OrderLineStockDataFragment,
-  stock: StockFragment
+  stock: StockFragment,
 ) => {
   if (!stock) {
     return 0;
   }
   const allocatedQuantityForLine = getAllocatedQuantityForLine(
     line,
-    stock.warehouse.id
+    stock.warehouse.id,
   );
 
   const availableQuantity =
@@ -328,24 +327,29 @@ export const getOrderLineAvailableQuantity = (
   return availableQuantity;
 };
 
-export type OrderFulfillStockInputFormsetData = Array<
-  Pick<FormsetData<null, OrderFulfillStockInput[]>[0], "id" | "value">
+export interface OrderFulfillLineFormData {
+  quantity: number;
+  warehouse: WarehouseFragment;
+}
+
+export type OrderFulfillStockFormsetData = Array<
+  Pick<FormsetData<null, OrderFulfillLineFormData[]>[0], "id" | "value">
 >;
 
 export const getFulfillmentFormsetQuantity = (
-  formsetData: OrderFulfillStockInputFormsetData,
-  line: OrderLineStockDataFragment
+  formsetData: OrderFulfillStockFormsetData,
+  line: OrderLineStockDataFragment,
 ) => formsetData?.find(getById(line.id))?.value?.[0]?.quantity;
 
 export const getWarehouseStock = (
   stocks: StockFragment[],
-  warehouseId: string
+  warehouseId: string,
 ) => stocks?.find(stock => stock.warehouse.id === warehouseId);
 
 export const isLineAvailableInWarehouse = (
-  line: OrderLineStockDataFragment,
-  warehouse: WarehouseFragment
-) => {
+  line: OrderFulfillLineFragment | OrderLineStockDataFragment,
+  warehouse: WarehouseFragment,
+): boolean => {
   if (!line?.variant?.stocks) {
     return false;
   }
@@ -356,26 +360,68 @@ export const isLineAvailableInWarehouse = (
   return false;
 };
 
-export const transformFuflillmentLinesToStockInputFormsetData = (
+export const getLineAvailableQuantityInWarehouse = (
+  line: OrderFulfillLineFragment,
+  warehouse: WarehouseFragment,
+): number => {
+  if (!line?.variant?.stocks) {
+    return 0;
+  }
+  const stock = getWarehouseStock(line.variant.stocks, warehouse.id);
+  if (stock) {
+    return getOrderLineAvailableQuantity(line, stock);
+  }
+  return 0;
+};
+
+export const getLineAllocationWithHighestQuantity = (
+  line: OrderFulfillLineFragment,
+): OrderFulfillLineFragment["allocations"][number] | undefined =>
+  line.allocations.reduce((prevAllocation, allocation) => {
+    if (!prevAllocation || prevAllocation.quantity < allocation.quantity) {
+      return allocation;
+    }
+    return prevAllocation;
+  }, null);
+
+export const getWarehouseWithHighestAvailableQuantity = (
+  lines?: OrderLineFragment[],
+): WarehouseFragment | undefined => {
+  let highestAvailableQuantity = 0;
+
+  return lines?.reduce(
+    (selectedWarehouse, line) =>
+      line.allocations.reduce((warehouse, allocation) => {
+        if (allocation.quantity > highestAvailableQuantity) {
+          highestAvailableQuantity = allocation.quantity;
+          return allocation.warehouse;
+        }
+        return warehouse;
+      }, selectedWarehouse),
+    null as WarehouseFragment,
+  );
+};
+
+export const transformFuflillmentLinesToStockFormsetData = (
   lines: FulfillmentFragment["lines"],
-  warehouseId: string
-): OrderFulfillStockInputFormsetData =>
+  warehouse: WarehouseFragment,
+): OrderFulfillStockFormsetData =>
   lines?.map(line => ({
     data: null,
     id: line.orderLine.id,
     value: [
       {
         quantity: line.quantity,
-        warehouse: warehouseId
-      }
-    ]
+        warehouse,
+      },
+    ],
   }));
 
 export const getAttributesCaption = (
-  attributes: OrderFulfillLineFragment["variant"]["attributes"]
-): string =>
+  attributes: OrderFulfillLineFragment["variant"]["attributes"] | undefined,
+): string | undefined =>
   attributes
-    .map(attribute =>
-      attribute.values.map(attributeValue => attributeValue.name).join(", ")
+    ?.map(attribute =>
+      attribute.values.map(attributeValue => attributeValue.name).join(", "),
     )
     .join(" / ");

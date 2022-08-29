@@ -1,4 +1,6 @@
-import ShippingZonesCard from "@saleor/channels/components/ShippingZonesCard/ShippingZonesCard";
+import ChannelAllocationStrategy from "@saleor/channels/components/ChannelAllocationStrategy";
+import ShippingZones from "@saleor/channels/components/ShippingZones";
+import Warehouses from "@saleor/channels/components/Warehouses";
 import { channelsListUrl } from "@saleor/channels/urls";
 import CardSpacer from "@saleor/components/CardSpacer";
 import Form from "@saleor/components/Form";
@@ -6,11 +8,14 @@ import Grid from "@saleor/components/Grid";
 import Savebar from "@saleor/components/Savebar";
 import { SingleAutocompleteChoiceType } from "@saleor/components/SingleAutocompleteSelectField";
 import {
+  AllocationStrategyEnum,
   ChannelDetailsFragment,
   ChannelErrorFragment,
   CountryCode,
   CountryFragment,
-  SearchShippingZonesQuery
+  SearchShippingZonesQuery,
+  SearchWarehousesQuery,
+  StockSettingsInput,
 } from "@saleor/graphql";
 import { SearchData } from "@saleor/hooks/makeTopLevelSearch";
 import { getParsedSearchData } from "@saleor/hooks/makeTopLevelSearch/utils";
@@ -18,10 +23,6 @@ import { SubmitPromise } from "@saleor/hooks/useForm";
 import useNavigator from "@saleor/hooks/useNavigator";
 import useStateFromProps from "@saleor/hooks/useStateFromProps";
 import { ConfirmButtonTransitionState } from "@saleor/macaw-ui";
-import {
-  getById,
-  getByUnmatchingId
-} from "@saleor/orders/components/OrderReturnPage/utils";
 import { FetchMoreProps, RelayToFlat } from "@saleor/types";
 import createSingleAutocompleteSelectHandler from "@saleor/utils/handlers/singleAutocompleteSelectChangeHandler";
 import { mapCountriesToChoices } from "@saleor/utils/maps";
@@ -29,8 +30,14 @@ import React, { useState } from "react";
 
 import { ChannelForm, FormData } from "../../components/ChannelForm";
 import { ChannelStatus } from "../../components/ChannelStatus/ChannelStatus";
-import { ChannelShippingZones } from "./types";
-import { getUpdatedIdsWithNewId, getUpdatedIdsWithoutNewId } from "./utils";
+import {
+  createShippingZoneAddHandler,
+  createShippingZoneRemoveHandler,
+  createWarehouseAddHandler,
+  createWarehouseRemoveHandler,
+  createWarehouseReorderHandler,
+} from "./handlers";
+import { ChannelShippingZones, ChannelWarehouses } from "./types";
 
 export interface ChannelDetailsPageProps<TErrors> {
   channel?: ChannelDetailsFragment;
@@ -42,11 +49,17 @@ export interface ChannelDetailsPageProps<TErrors> {
   searchShippingZonesData?: SearchData;
   fetchMoreShippingZones: FetchMoreProps;
   channelShippingZones?: ChannelShippingZones;
+  allShippingZonesCount: number;
+  searchWarehousesData?: SearchData;
+  fetchMoreWarehouses: FetchMoreProps;
+  channelWarehouses?: ChannelWarehouses;
+  allWarehousesCount: number;
   countries: CountryFragment[];
   onDelete?: () => void;
   onSubmit: (data: FormData) => SubmitPromise<TErrors[]>;
   updateChannelStatus?: () => void;
   searchShippingZones: (query: string) => void;
+  searchWarehouses: (query: string) => void;
 }
 
 const ChannelDetailsPage = function<TErrors>({
@@ -62,38 +75,60 @@ const ChannelDetailsPage = function<TErrors>({
   searchShippingZones,
   searchShippingZonesData,
   fetchMoreShippingZones,
+  channelShippingZones = [],
+  allShippingZonesCount,
+  searchWarehouses,
+  searchWarehousesData,
+  fetchMoreWarehouses,
+  channelWarehouses = [],
+  allWarehousesCount,
   countries,
-  channelShippingZones = []
 }: ChannelDetailsPageProps<TErrors>) {
   const navigate = useNavigator();
 
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState("");
   const [
     selectedCountryDisplayName,
-    setSelectedCountryDisplayName
+    setSelectedCountryDisplayName,
   ] = useStateFromProps(channel?.defaultCountry.country || "");
-
-  const [shippingZonesToDisplay, setShippingZonesToDisplay] = useStateFromProps<
-    ChannelShippingZones
-  >(channelShippingZones);
 
   const countryChoices = mapCountriesToChoices(countries || []);
 
-  const { defaultCountry, ...formData } = channel || {};
+  const { defaultCountry, stockSettings, ...formData } =
+    channel || ({} as ChannelDetailsFragment);
+  const initialStockSettings: StockSettingsInput = {
+    allocationStrategy: AllocationStrategyEnum.PRIORITIZE_SORTING_ORDER,
+    ...stockSettings,
+  };
   const initialData: FormData = {
     currencyCode: "",
     name: "",
     slug: "",
     shippingZonesIdsToAdd: [],
     shippingZonesIdsToRemove: [],
+    warehousesIdsToAdd: [],
+    warehousesIdsToRemove: [],
     defaultCountry: (defaultCountry?.code || "") as CountryCode,
-    ...formData
+    ...formData,
+    ...initialStockSettings,
+    shippingZonesToDisplay: channelShippingZones,
+    warehousesToDisplay: channelWarehouses,
   };
 
-  const getFilteredShippingZonesChoices = (): RelayToFlat<SearchShippingZonesQuery["search"]> =>
+  const getFilteredShippingZonesChoices = (
+    shippingZonesToDisplay: ChannelShippingZones,
+  ): RelayToFlat<SearchShippingZonesQuery["search"]> =>
     getParsedSearchData({ data: searchShippingZonesData }).filter(
       ({ id: searchedZoneId }) =>
-        !shippingZonesToDisplay.some(({ id }) => id === searchedZoneId)
+        !shippingZonesToDisplay.some(({ id }) => id === searchedZoneId),
+    );
+
+  const getFilteredWarehousesChoices = (
+    warehousesToDisplay: ChannelWarehouses,
+  ): RelayToFlat<SearchWarehousesQuery["search"]> =>
+    getParsedSearchData({ data: searchWarehousesData }).filter(
+      ({ id: searchedWarehouseId }) =>
+        !warehousesToDisplay.some(({ id }) => id === searchedWarehouseId),
     );
 
   const checkIfSaveIsDisabled = (data: FormData) => {
@@ -114,56 +149,42 @@ const ChannelDetailsPage = function<TErrors>({
       initial={initialData}
       checkIfSaveIsDisabled={checkIfSaveIsDisabled}
     >
-      {({ change, data, submit, set, isSaveDisabled }) => {
+      {({ change, data, submit, set, isSaveDisabled, triggerChange }) => {
         const handleCurrencyCodeSelect = createSingleAutocompleteSelectHandler(
           change,
           setSelectedCurrencyCode,
-          currencyCodes
+          currencyCodes,
         );
         const handleDefaultCountrySelect = createSingleAutocompleteSelectHandler(
           change,
           setSelectedCountryDisplayName,
-          countryChoices
+          countryChoices,
         );
 
-        const addShippingZone = (zoneId: string) => {
-          set({
-            ...data,
-            shippingZonesIdsToRemove: getUpdatedIdsWithoutNewId(
-              data.shippingZonesIdsToRemove,
-              zoneId
-            ),
-            shippingZonesIdsToAdd: getUpdatedIdsWithNewId(
-              data.shippingZonesIdsToAdd,
-              zoneId
-            )
-          });
+        const addShippingZone = createShippingZoneAddHandler(
+          data,
+          searchShippingZonesData,
+          set,
+          triggerChange,
+        );
+        const removeShippingZone = createShippingZoneRemoveHandler(
+          data,
+          set,
+          triggerChange,
+        );
 
-          setShippingZonesToDisplay([
-            ...shippingZonesToDisplay,
-            getParsedSearchData({ data: searchShippingZonesData }).find(
-              getById(zoneId)
-            )
-          ]);
-        };
-
-        const removeShippingZone = (zoneId: string) => {
-          set({
-            ...data,
-            shippingZonesIdsToAdd: getUpdatedIdsWithoutNewId(
-              data.shippingZonesIdsToAdd,
-              zoneId
-            ),
-            shippingZonesIdsToRemove: getUpdatedIdsWithNewId(
-              data.shippingZonesIdsToRemove,
-              zoneId
-            )
-          });
-
-          setShippingZonesToDisplay(
-            shippingZonesToDisplay.filter(getByUnmatchingId(zoneId))
-          );
-        };
+        const addWarehouse = createWarehouseAddHandler(
+          data,
+          searchWarehousesData,
+          set,
+          triggerChange,
+        );
+        const removeWarehouse = createWarehouseRemoveHandler(
+          data,
+          set,
+          triggerChange,
+        );
+        const reorderWarehouse = createWarehouseReorderHandler(data, set);
 
         return (
           <>
@@ -193,13 +214,37 @@ const ChannelDetailsPage = function<TErrors>({
                     <CardSpacer />
                   </>
                 )}
-                <ShippingZonesCard
-                  shippingZonesChoices={getFilteredShippingZonesChoices()}
-                  shippingZones={shippingZonesToDisplay}
+                <ShippingZones
+                  shippingZonesChoices={getFilteredShippingZonesChoices(
+                    data.shippingZonesToDisplay,
+                  )}
+                  shippingZones={data.shippingZonesToDisplay}
                   addShippingZone={addShippingZone}
                   removeShippingZone={removeShippingZone}
                   searchShippingZones={searchShippingZones}
                   fetchMoreShippingZones={fetchMoreShippingZones}
+                  totalCount={allShippingZonesCount}
+                  loading={disabled}
+                />
+                <CardSpacer />
+                <Warehouses
+                  warehousesChoices={getFilteredWarehousesChoices(
+                    data.warehousesToDisplay,
+                  )}
+                  warehouses={data.warehousesToDisplay}
+                  addWarehouse={addWarehouse}
+                  removeWarehouse={removeWarehouse}
+                  searchWarehouses={searchWarehouses}
+                  fetchMoreWarehouses={fetchMoreWarehouses}
+                  totalCount={allWarehousesCount}
+                  reorderWarehouses={reorderWarehouse}
+                  loading={disabled}
+                />
+                <CardSpacer />
+                <ChannelAllocationStrategy
+                  data={data}
+                  disabled={disabled}
+                  onChange={change}
                 />
               </div>
             </Grid>

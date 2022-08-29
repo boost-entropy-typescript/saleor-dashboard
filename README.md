@@ -1,8 +1,23 @@
-# Saleor Dashboard
+![Saleor Dashboard](https://user-images.githubusercontent.com/44495184/185379472-2a204c0b-9b7a-4a3e-93c0-2cb85205ed5e.png)
 
-![Saleor Dashboard](https://user-images.githubusercontent.com/249912/82305745-5c52fd00-99be-11ea-9ac6-cc04a6f28c91.png)
 
-A GraphQL-powered, single-page dashboard application for [Saleor](https://github.com/saleor/saleor/).
+<div align="center">
+  <h1>Saleor Dashboard</h1>
+</div>
+
+<div align="center">
+  <p>A GraphQL-powered, single-page dashboard application for <a href="https://github.com/saleor/saleor">Saleor</a>.</p>
+</div>
+
+<div align="center">
+  <a href="https://saleor.io/">🏠 Website</a>
+  <span> • </span>
+  <a href="https://docs.saleor.io/docs/3.x/">📚 Docs</a>
+  <span> • </span>
+  <a href="https://saleor.io/blog/">📰 Blog</a>
+  <span> • </span>
+  <a href="https://twitter.com/getsaleor">🐦 Twitter</a>
+</div>
 
 ## Demo
 
@@ -61,7 +76,7 @@ $ npm i
 
 ### Configuration
 
-There following environment variables are available for configuration:
+Create ```.env``` file in a root directory or set environment variables with following values:
 
 - `API_URI` (required) - URI of a running instance of Saleor GraphQL API.
   If you are running Saleor locally with the default settings, set `API_URI` to: `http://localhost:8000/graphql/`.

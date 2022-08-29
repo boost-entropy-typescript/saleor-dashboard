@@ -36,3 +36,11 @@ export const warehouseDetails = gql`
     }
   }
 `;
+
+export const warehousesCount = gql`
+  query WarehousesCount {
+    warehouses {
+      totalCount
+    }
+  }
+`;

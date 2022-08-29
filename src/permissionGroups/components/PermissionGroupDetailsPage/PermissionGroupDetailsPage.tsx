@@ -10,7 +10,7 @@ import {
   PermissionEnum,
   PermissionGroupDetailsFragment,
   PermissionGroupErrorFragment,
-  UserPermissionFragment
+  UserPermissionFragment,
 } from "@saleor/graphql";
 import { SubmitPromise } from "@saleor/hooks/useForm";
 import useNavigator from "@saleor/hooks/useNavigator";
@@ -18,11 +18,11 @@ import { sectionNames } from "@saleor/intl";
 import { ConfirmButtonTransitionState } from "@saleor/macaw-ui";
 import {
   MembersListUrlSortField,
-  permissionGroupListUrl
+  permissionGroupListUrl,
 } from "@saleor/permissionGroups/urls";
 import {
   extractPermissionCodes,
-  isGroupFullAccess
+  isGroupFullAccess,
 } from "@saleor/permissionGroups/utils";
 import { ListActions, SortPage } from "@saleor/types";
 import { getFormErrors } from "@saleor/utils/errors";
@@ -53,7 +53,6 @@ export interface PermissionGroupDetailsPageProps
   disabled: boolean;
   errors: PermissionGroupErrorFragment[];
   members: PermissionGroupDetailsFragment["users"];
-  membersModified: boolean;
   permissionGroup: PermissionGroupDetailsFragment;
   permissions: PermissionData[];
   permissionsExceeded: boolean;
@@ -67,7 +66,6 @@ const PermissionGroupDetailsPage: React.FC<PermissionGroupDetailsPageProps> = ({
   disabled,
   errors,
   members,
-  membersModified,
   onSubmit,
   permissionGroup,
   permissions,
@@ -83,13 +81,13 @@ const PermissionGroupDetailsPage: React.FC<PermissionGroupDetailsPageProps> = ({
     isActive: false,
     name: permissionGroup?.name || "",
     permissions: extractPermissionCodes(permissionGroup),
-    users: members
+    users: members,
   };
 
   const formErrors = getFormErrors(["addPermissions"], errors);
   const permissionsError = getPermissionGroupErrorMessage(
     formErrors.addPermissions,
-    intl
+    intl,
   );
 
   return (
@@ -127,13 +125,13 @@ const PermissionGroupDetailsPage: React.FC<PermissionGroupDetailsPageProps> = ({
                 fullAccessLabel={intl.formatMessage({
                   id: "mAabef",
                   defaultMessage: "Group has full access to the store",
-                  description: "checkbox label"
+                  description: "checkbox label",
                 })}
                 description={intl.formatMessage({
                   id: "CYZse9",
                   defaultMessage:
                     "Expand or restrict group's permissions to access certain part of saleor system.",
-                  description: "card description"
+                  description: "card description",
                 })}
               />
             </div>
@@ -143,7 +141,7 @@ const PermissionGroupDetailsPage: React.FC<PermissionGroupDetailsPageProps> = ({
               onCancel={() => navigate(permissionGroupListUrl())}
               onSubmit={submit}
               state={saveButtonBarState}
-              disabled={disabled || !membersModified}
+              disabled={disabled}
             />
           </div>
         </Container>

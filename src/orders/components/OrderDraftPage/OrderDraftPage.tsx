@@ -8,12 +8,18 @@ import Grid from "@saleor/components/Grid";
 import PageHeader from "@saleor/components/PageHeader";
 import Savebar from "@saleor/components/Savebar";
 import Skeleton from "@saleor/components/Skeleton";
-import { OrderDetailsFragment, SearchCustomersQuery } from "@saleor/graphql";
+import {
+  ChannelUsabilityDataQuery,
+  OrderDetailsFragment,
+  OrderErrorFragment,
+  OrderLineInput,
+  SearchCustomersQuery,
+} from "@saleor/graphql";
 import { SubmitPromise } from "@saleor/hooks/useForm";
 import useNavigator from "@saleor/hooks/useNavigator";
 import { sectionNames } from "@saleor/intl";
-import { ConfirmButtonTransitionState, makeStyles } from "@saleor/macaw-ui";
-import DraftOrderChannelSectionCard from "@saleor/orders/components/DraftOrderChannelSectionCard";
+import { ConfirmButtonTransitionState } from "@saleor/macaw-ui";
+import OrderChannelSectionCard from "@saleor/orders/components/OrderChannelSectionCard";
 import { orderDraftListUrl } from "@saleor/orders/urls";
 import { FetchMoreProps, RelayToFlat } from "@saleor/types";
 import React from "react";
@@ -21,27 +27,17 @@ import { useIntl } from "react-intl";
 
 import OrderCustomer, { CustomerEditData } from "../OrderCustomer";
 import OrderDraftDetails from "../OrderDraftDetails/OrderDraftDetails";
-import { FormData as OrderDraftDetailsProductsFormData } from "../OrderDraftDetailsProducts";
 import OrderHistory, { FormData as HistoryFormData } from "../OrderHistory";
-
-const useStyles = makeStyles(
-  theme => ({
-    date: {
-      marginBottom: theme.spacing(3)
-    },
-    header: {
-      display: "flex",
-      marginBottom: 0
-    }
-  }),
-  { name: "OrderDraftPage" }
-);
+import OrderDraftAlert from "./OrderDraftAlert";
+import { usePageStyles } from "./styles";
 
 export interface OrderDraftPageProps extends FetchMoreProps {
   disabled: boolean;
-  order: OrderDetailsFragment;
+  order?: OrderDetailsFragment;
+  channelUsabilityData?: ChannelUsabilityDataQuery;
   users: RelayToFlat<SearchCustomersQuery["search"]>;
   usersLoading: boolean;
+  errors: OrderErrorFragment[];
   saveButtonBarState: ConfirmButtonTransitionState;
   fetchUsers: (query: string) => void;
   onBillingAddressEdit: () => void;
@@ -50,10 +46,7 @@ export interface OrderDraftPageProps extends FetchMoreProps {
   onDraftRemove: () => void;
   onNoteAdd: (data: HistoryFormData) => SubmitPromise<any[]>;
   onOrderLineAdd: () => void;
-  onOrderLineChange: (
-    id: string,
-    data: OrderDraftDetailsProductsFormData
-  ) => void;
+  onOrderLineChange: (id: string, data: OrderLineInput) => void;
   onOrderLineRemove: (id: string) => void;
   onProductClick: (id: string) => void;
   onShippingAddressEdit: () => void;
@@ -80,10 +73,12 @@ const OrderDraftPage: React.FC<OrderDraftPageProps> = props => {
     onShippingMethodEdit,
     onProfileView,
     order,
+    channelUsabilityData,
     users,
-    usersLoading
+    usersLoading,
+    errors,
   } = props;
-  const classes = useStyles(props);
+  const classes = usePageStyles(props);
   const navigate = useNavigator();
 
   const intl = useIntl();
@@ -104,10 +99,10 @@ const OrderDraftPage: React.FC<OrderDraftPageProps> = props => {
               label: intl.formatMessage({
                 id: "PAqicb",
                 defaultMessage: "Cancel order",
-                description: "button"
+                description: "button",
               }),
-              onSelect: onDraftRemove
-            }
+              onSelect: onDraftRemove,
+            },
           ]}
         />
       </PageHeader>
@@ -122,8 +117,14 @@ const OrderDraftPage: React.FC<OrderDraftPageProps> = props => {
       </div>
       <Grid>
         <div>
+          <OrderDraftAlert
+            order={order}
+            channelUsabilityData={channelUsabilityData}
+          />
           <OrderDraftDetails
             order={order}
+            channelUsabilityData={channelUsabilityData}
+            errors={errors}
             onOrderLineAdd={onOrderLineAdd}
             onOrderLineChange={onOrderLineChange}
             onOrderLineRemove={onOrderLineRemove}
@@ -136,12 +137,15 @@ const OrderDraftPage: React.FC<OrderDraftPageProps> = props => {
           />
         </div>
         <div>
+          <OrderChannelSectionCard channel={order?.channel} />
+          <CardSpacer />
           <OrderCustomer
             canEditAddresses={!!order?.user}
             canEditCustomer={true}
             fetchUsers={fetchUsers}
             hasMore={hasMore}
             loading={usersLoading}
+            errors={errors}
             order={order}
             users={users}
             onBillingAddressEdit={onBillingAddressEdit}
@@ -150,21 +154,19 @@ const OrderDraftPage: React.FC<OrderDraftPageProps> = props => {
             onProfileView={onProfileView}
             onShippingAddressEdit={onShippingAddressEdit}
           />
-          <CardSpacer />
-          <DraftOrderChannelSectionCard channelName={order?.channel?.name} />
         </div>
       </Grid>
       <Savebar
         state={saveButtonBarState}
-        disabled={disabled || !order?.canFinalize}
+        disabled={disabled}
         onCancel={() => navigate(orderDraftListUrl())}
         onSubmit={onDraftFinalize}
         labels={{
           confirm: intl.formatMessage({
             id: "4Z14xW",
             defaultMessage: "Finalize",
-            description: "button"
-          })
+            description: "button",
+          }),
         }}
       />
     </Container>

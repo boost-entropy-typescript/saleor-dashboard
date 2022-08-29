@@ -12,6 +12,8 @@ import { useIntl } from "react-intl";
 
 import { useStyles } from "../styles";
 import { ChannelOpts, ChannelsAvailabilityError, Messages } from "../types";
+import { availabilityItemMessages } from "./messages";
+
 export interface ChannelContentProps {
   disabled?: boolean;
   data: ChannelData;
@@ -19,12 +21,13 @@ export interface ChannelContentProps {
   messages: Messages;
   onChange: (id: string, data: ChannelOpts) => void;
 }
+
 const ChannelContent: React.FC<ChannelContentProps> = ({
   data,
   disabled,
   errors,
   messages,
-  onChange
+  onChange,
 }) => {
   const {
     availableForPurchase,
@@ -32,7 +35,7 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
     isPublished,
     publicationDate,
     visibleInListings,
-    id
+    id,
   } = data;
   const formData = {
     ...(availableForPurchase !== undefined ? { availableForPurchase } : {}),
@@ -41,41 +44,36 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
       : {}),
     isPublished,
     publicationDate,
-    ...(visibleInListings !== undefined ? { visibleInListings } : {})
+    ...(visibleInListings !== undefined ? { visibleInListings } : {}),
   };
   const dateNow = useCurrentDate();
   const localizeDate = useDateLocalize();
   const hasAvailableProps =
     isAvailable !== undefined && availableForPurchase !== undefined;
   const [isPublicationDate, setPublicationDate] = useState(
-    publicationDate === null
+    publicationDate === null,
   );
   const [isAvailableDate, setAvailableDate] = useState(false);
   const intl = useIntl();
   const classes = useStyles({});
 
-  const todayDate = localizeDate(new Date(dateNow).toISOString(), "YYYY-MM-DD");
+  const parsedDate = new Date(dateNow);
+  const todayDateUTC = parsedDate.toISOString().slice(0, 10);
 
   const visibleMessage = (date: string) =>
-    intl.formatMessage(
-      {
-        id: "UjsI4o",
-        defaultMessage: "since {date}",
-        description: "date"
-      },
-      {
-        date: localizeDate(date, "L")
-      }
-    );
+    intl.formatMessage(availabilityItemMessages.sinceDate, {
+      date: localizeDate(date),
+    });
   const formErrors = getFormErrors(
     ["availableForPurchaseDate", "publicationDate"],
-    errors
+    errors,
   );
+
   return (
     <div className={classes.container}>
       <RadioSwitchField
         classes={{
-          radioLabel: classes.radioLabel
+          radioLabel: classes.radioLabel,
         }}
         className={classes.radioField}
         disabled={disabled}
@@ -111,7 +109,7 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
             ...formData,
             isPublished: !isPublished,
             publicationDate:
-              !isPublished && !publicationDate ? todayDate : publicationDate
+              !isPublished && !publicationDate ? todayDateUTC : publicationDate,
           });
         }}
       />
@@ -121,20 +119,13 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
             className={classes.setPublicationDate}
             onClick={() => setPublicationDate(!isPublicationDate)}
           >
-            {intl.formatMessage({
-              id: "U3BQKA",
-              defaultMessage: "Set publication date"
-            })}
+            {intl.formatMessage(availabilityItemMessages.setPublicationDate)}
           </Typography>
           {isPublicationDate && (
             <TextField
               error={!!formErrors.publicationDate}
               disabled={disabled}
-              label={intl.formatMessage({
-                id: "Jt3DwJ",
-                defaultMessage: "Publish on",
-                description: "publish on date"
-              })}
+              label={intl.formatMessage(availabilityItemMessages.publishOn)}
               name={`channel:publicationDate:${id}`}
               type="date"
               fullWidth={true}
@@ -147,12 +138,12 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
               onChange={e =>
                 onChange(id, {
                   ...formData,
-                  publicationDate: e.target.value || null
+                  publicationDate: e.target.value || null,
                 })
               }
               className={classes.date}
               InputLabelProps={{
-                shrink: true
+                shrink: true,
               }}
             />
           )}
@@ -163,7 +154,7 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
           <Hr />
           <RadioSwitchField
             classes={{
-              radioLabel: classes.radioLabel
+              radioLabel: classes.radioLabel,
             }}
             className={classes.radioField}
             disabled={disabled}
@@ -196,7 +187,7 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
               return onChange(id, {
                 ...formData,
                 availableForPurchase: !value ? null : availableForPurchase,
-                isAvailableForPurchase: value
+                isAvailableForPurchase: value,
               });
             }}
           />
@@ -212,11 +203,9 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
                 <TextField
                   error={!!formErrors.availableForPurchaseDate}
                   disabled={disabled}
-                  label={intl.formatMessage({
-                    id: "Y7Vy19",
-                    defaultMessage: "Set available on",
-                    description: "available on date"
-                  })}
+                  label={intl.formatMessage(
+                    availabilityItemMessages.setAvailableOn,
+                  )}
                   name={`channel:availableForPurchase:${id}`}
                   type="date"
                   fullWidth={true}
@@ -224,7 +213,7 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
                     formErrors.availableForPurchaseDate
                       ? getProductErrorMessage(
                           formErrors.availableForPurchaseDate,
-                          intl
+                          intl,
                         )
                       : ""
                   }
@@ -232,12 +221,12 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
                   onChange={e =>
                     onChange(id, {
                       ...formData,
-                      availableForPurchase: e.target.value
+                      availableForPurchase: e.target.value,
                     })
                   }
                   className={classes.date}
                   InputLabelProps={{
-                    shrink: true
+                    shrink: true,
                   }}
                 />
               )}
@@ -251,29 +240,24 @@ const ChannelContent: React.FC<ChannelContentProps> = ({
           <ControlledCheckbox
             className={classes.checkbox}
             name={`channel:visibleInListings:${id}`}
-            checked={visibleInListings}
+            checked={!visibleInListings}
             disabled={disabled}
             label={
               <>
                 <p className={classNames(classes.label, classes.listingLabel)}>
-                  {intl.formatMessage({
-                    id: "0cVk9I",
-                    defaultMessage: "Show in product listings"
-                  })}
+                  {intl.formatMessage(availabilityItemMessages.hideInListings)}
                 </p>
                 <span className={classes.secondLabel}>
-                  {intl.formatMessage({
-                    id: "5ukAFZ",
-                    defaultMessage:
-                      "Disabling this checkbox will remove product from search and category pages. It will be available on collection pages."
-                  })}
+                  {intl.formatMessage(
+                    availabilityItemMessages.hideInListingsDescription,
+                  )}
                 </span>
               </>
             }
             onChange={e =>
               onChange(id, {
                 ...formData,
-                visibleInListings: e.target.value
+                visibleInListings: !e.target.value,
               })
             }
           />

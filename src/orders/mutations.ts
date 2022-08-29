@@ -384,7 +384,10 @@ export const orderLineDeleteMutation = gql`
         ...OrderError
       }
       order {
-        ...OrderDetails
+        id
+        lines {
+          ...OrderLine
+        }
       }
     }
   }
@@ -397,7 +400,10 @@ export const orderLinesAddMutation = gql`
         ...OrderError
       }
       order {
-        ...OrderDetails
+        id
+        lines {
+          ...OrderLine
+        }
       }
     }
   }
@@ -409,8 +415,8 @@ export const orderLineUpdateMutation = gql`
       errors {
         ...OrderError
       }
-      order {
-        ...OrderDetails
+      orderLine {
+        ...OrderLine
       }
     }
   }
@@ -422,7 +428,6 @@ export const fulfillOrder = gql`
       errors {
         ...OrderError
         warehouse
-        orderLines
       }
       order {
         ...OrderDetails

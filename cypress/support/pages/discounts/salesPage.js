@@ -10,14 +10,14 @@ import { selectChannelInDetailsPages } from "../channelsPage";
 
 export const discountOptions = {
   PERCENTAGE: SALES_SELECTORS.percentageOption,
-  FIXED: SALES_SELECTORS.fixedOption
+  FIXED: SALES_SELECTORS.fixedOption,
 };
 
 export function createSale({
   saleName,
   channelName,
   discountValue = 10,
-  discountOption = discountOptions.PERCENTAGE
+  discountOption = discountOptions.PERCENTAGE,
 }) {
   const todaysDate = formatDate(new Date());
 
@@ -83,7 +83,7 @@ export function createSaleWithNewProduct({
   categoryId,
   price,
   discountOption,
-  discountValue
+  discountValue,
 }) {
   return createProductInChannel({
     name,
@@ -92,21 +92,21 @@ export function createSaleWithNewProduct({
     productTypeId,
     attributeId,
     categoryId,
-    price
+    price,
   }).then(({ product: productResp }) => {
+    const product = productResp;
     /* Uncomment after fixing SALEOR-3367 bug
        cy.clearSessionData()
       .loginUserViaRequest("auth", ONE_PERMISSION_USERS.discount) 
       */
-
-    cy.visit(urlList.sales);
-    cy.softExpectSkeletonIsVisible();
-    const product = productResp;
+    cy.visit(urlList.sales)
+      .expectSkeletonIsVisible()
+      .waitForProgressBarToNotExist();
     createSale({
       saleName: name,
       channelName: channel.name,
       discountValue,
-      discountOption
+      discountOption,
     });
     assignProducts(product.name);
     return getProductPrice(product.id, channel.slug);
@@ -122,7 +122,7 @@ export function createSaleWithNewVariant({
   categoryId,
   price,
   discountValue,
-  discountOption
+  discountOption,
 }) {
   return createProductInChannel({
     name,
@@ -131,20 +131,21 @@ export function createSaleWithNewVariant({
     productTypeId,
     attributeId,
     categoryId,
-    price
+    price,
   }).then(({ variantsList: variantsListResp, product }) => {
+    const variant = variantsListResp[0];
     /* Uncomment after fixing SALEOR-3367 bug
        cy.clearSessionData()
       .loginUserViaRequest("auth", ONE_PERMISSION_USERS.discount) 
       */
-    cy.visit(urlList.sales);
-    cy.softExpectSkeletonIsVisible();
-    const variant = variantsListResp[0];
+    cy.visit(urlList.sales)
+      .expectSkeletonIsVisible()
+      .waitForProgressBarToNotExist();
     createSale({
       saleName: name,
       channelName: channel.name,
       discountValue,
-      discountOption
+      discountOption,
     });
     assignVariants(product.name, variant.name);
     return getVariant(variant.id, channel.slug, "token");

@@ -19,20 +19,20 @@ export interface PaginationState {
 
 export function createPaginationState(
   paginateBy: number,
-  queryString: Pagination
+  queryString: Pagination,
 ): PaginationState {
   return queryString && (queryString.before || queryString.after)
     ? queryString.after
       ? {
           after: queryString.after,
-          first: paginateBy
+          first: paginateBy,
         }
       : {
           before: queryString.before,
-          last: paginateBy
+          last: paginateBy,
         }
     : {
-        first: paginateBy
+        first: paginateBy,
       };
 }
 
@@ -45,7 +45,7 @@ interface UsePaginatorArgs {
 function usePaginator({
   queryString,
   paginationState,
-  pageInfo
+  pageInfo,
 }: UsePaginatorArgs) {
   const newPageInfo = useMemo<PageInfo>(
     () =>
@@ -53,13 +53,14 @@ function usePaginator({
         ? {
             ...pageInfo,
             hasNextPage: !!paginationState.before || pageInfo.hasNextPage,
-            hasPreviousPage: !!paginationState.after || pageInfo.hasPreviousPage
+            hasPreviousPage:
+              !!paginationState.after || pageInfo.hasPreviousPage,
           }
         : undefined,
-    [paginationState, pageInfo]
+    [paginationState, pageInfo],
   );
 
-  const nextPageHref = useMemo(() => {
+  const nextHref = useMemo(() => {
     if (!newPageInfo?.hasNextPage || !pageInfo?.endCursor) {
       return undefined;
     }
@@ -69,12 +70,12 @@ function usePaginator({
       stringifyQs({
         ...queryString,
         after: pageInfo.endCursor,
-        before: undefined
+        before: undefined,
       })
     );
   }, [pageInfo?.endCursor, newPageInfo?.hasNextPage, queryString]);
 
-  const prevPageHref = useMemo(() => {
+  const prevHref = useMemo(() => {
     if (!newPageInfo?.hasPreviousPage || !pageInfo?.startCursor) {
       return undefined;
     }
@@ -83,16 +84,16 @@ function usePaginator({
       stringifyQs({
         ...queryString,
         after: undefined,
-        before: pageInfo.startCursor
+        before: pageInfo.startCursor,
       })
     );
   }, [pageInfo?.startCursor, newPageInfo?.hasPreviousPage, queryString]);
 
   return {
-    nextPageHref,
-    prevPageHref,
+    nextHref,
+    prevHref,
     paginatorType: "link" as const,
-    ...newPageInfo
+    ...newPageInfo,
   };
 }
 
@@ -109,22 +110,22 @@ export type PaginatorContextValues = PaginatorContextValuesCommon &
   (
     | {
         paginatorType: "link";
-        nextPageHref?: string;
-        prevPageHref?: string;
+        nextHref?: string;
+        prevHref?: string;
         loadNextPage?: never;
         loadPreviousPage?: never;
       }
     | {
         paginatorType: "click";
-        nextPageHref?: never;
-        prevPageHref?: never;
+        nextHref?: never;
+        prevHref?: never;
         loadNextPage: () => void;
         loadPreviousPage: () => void;
       }
   );
 
 export const PaginatorContext = createContext<PaginatorContextValues | null>(
-  null
+  null,
 );
 
 export const usePaginatorContext = () => {
@@ -132,7 +133,7 @@ export const usePaginatorContext = () => {
 
   if (context === null) {
     throw new Error(
-      "usePaginatorContext must be used within a PaginatorContext.Provider"
+      "usePaginatorContext must be used within a PaginatorContext.Provider",
     );
   }
 

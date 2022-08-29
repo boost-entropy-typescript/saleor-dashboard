@@ -1,29 +1,31 @@
 import { FetchResult } from "@apollo/client";
 import {
   getAttributesAfterFileAttributesUpdate,
-  mergeFileUploadErrors
+  mergeFileUploadErrors,
 } from "@saleor/attributes/utils/data";
 import {
   handleUploadMultipleFiles,
-  prepareAttributesInput
+  prepareAttributesInput,
 } from "@saleor/attributes/utils/handlers";
 import { ChannelData } from "@saleor/channels/utils";
 import {
   AttributeErrorFragment,
   FileUploadMutation,
   FileUploadMutationVariables,
+  ProductChannelListingErrorFragment,
   ProductChannelListingUpdateMutation,
   ProductChannelListingUpdateMutationVariables,
   ProductCreateMutation,
   ProductCreateMutationVariables,
   ProductDeleteMutation,
   ProductDeleteMutationVariables,
+  ProductErrorFragment,
   ProductTypeQuery,
   ProductVariantChannelListingUpdateMutation,
   ProductVariantChannelListingUpdateMutationVariables,
   UploadErrorFragment,
   VariantCreateMutation,
-  VariantCreateMutationVariables
+  VariantCreateMutationVariables,
 } from "@saleor/graphql";
 import { weight } from "@saleor/misc";
 import { ProductCreateData } from "@saleor/products/components/ProductCreatePage/form";
@@ -34,14 +36,14 @@ const getChannelsVariables = (productId: string, channels: ChannelData[]) => ({
   variables: {
     id: productId,
     input: {
-      updateChannels: getAvailabilityVariables(channels)
-    }
-  }
+      updateChannels: getAvailabilityVariables(channels),
+    },
+  },
 });
 
 const getSimpleProductVariables = (
   formData: ProductCreateData,
-  productId: string
+  productId: string,
 ) => ({
   input: {
     attributes: [],
@@ -49,30 +51,30 @@ const getSimpleProductVariables = (
     sku: formData.sku,
     stocks: formData.stocks?.map(stock => ({
       quantity: parseInt(stock.value, 10),
-      warehouse: stock.id
+      warehouse: stock.id,
     })),
     preorder: formData.isPreorder
       ? {
           globalThreshold: formData.globalThreshold
             ? parseInt(formData.globalThreshold, 10)
             : null,
-          endDate: formData.preorderEndDateTime || null
+          endDate: formData.preorderEndDateTime || null,
         }
       : null,
-    trackInventory: formData.trackInventory
-  }
+    trackInventory: formData.trackInventory,
+  },
 });
 
 export function createHandler(
   productType: ProductTypeQuery["productType"],
   uploadFile: (
-    variables: FileUploadMutationVariables
+    variables: FileUploadMutationVariables,
   ) => Promise<FetchResult<FileUploadMutation>>,
   productCreate: (
-    variables: ProductCreateMutationVariables
+    variables: ProductCreateMutationVariables,
   ) => Promise<FetchResult<ProductCreateMutation>>,
   productVariantCreate: (
-    variables: VariantCreateMutationVariables
+    variables: VariantCreateMutationVariables,
   ) => Promise<FetchResult<VariantCreateMutation>>,
   updateChannels: (options: {
     variables: ProductChannelListingUpdateMutationVariables;
@@ -82,20 +84,25 @@ export function createHandler(
   }) => Promise<FetchResult<ProductVariantChannelListingUpdateMutation>>,
   productDelete: (options: {
     variables: ProductDeleteMutationVariables;
-  }) => Promise<FetchResult<ProductDeleteMutation>>
+  }) => Promise<FetchResult<ProductDeleteMutation>>,
 ) {
   return async (formData: ProductCreateData) => {
-    let errors: Array<AttributeErrorFragment | UploadErrorFragment> = [];
+    let errors: Array<
+      | AttributeErrorFragment
+      | UploadErrorFragment
+      | ProductErrorFragment
+      | ProductChannelListingErrorFragment
+    > = [];
 
     const uploadFilesResult = await handleUploadMultipleFiles(
       formData.attributesWithNewFileValue,
-      uploadFile
+      uploadFile,
     );
 
     errors = [...errors, ...mergeFileUploadErrors(uploadFilesResult)];
     const updatedFileAttributes = getAttributesAfterFileAttributesUpdate(
       formData.attributesWithNewFileValue,
-      uploadFilesResult
+      uploadFilesResult,
     );
 
     const productVariables: ProductCreateMutationVariables = {
@@ -103,7 +110,7 @@ export function createHandler(
         attributes: prepareAttributesInput({
           attributes: formData.attributes,
           prevAttributes: null,
-          updatedFileAttributes
+          updatedFileAttributes,
         }),
         category: formData.category,
         chargeTaxes: formData.chargeTaxes,
@@ -114,17 +121,18 @@ export function createHandler(
         rating: formData.rating,
         seo: {
           description: formData.seoDescription,
-          title: formData.seoTitle
+          title: formData.seoTitle,
         },
         slug: formData.slug,
         taxCode: formData.changeTaxCode ? formData.taxCode : undefined,
-        weight: weight(formData.weight)
-      }
+        weight: weight(formData.weight),
+      },
     };
 
     const result = await productCreate(productVariables);
+    const productErrors = result.data.productCreate.errors || [];
 
-    let hasErrors = errors.length > 0;
+    errors = [...errors, ...productErrors];
 
     const hasVariants = productType?.hasVariants;
     const productId = result?.data?.productCreate?.product?.id;
@@ -136,16 +144,14 @@ export function createHandler(
     if (!hasVariants) {
       const result = await Promise.all([
         updateChannels(
-          getChannelsVariables(productId, formData.channelListings)
+          getChannelsVariables(productId, formData.channelListings),
         ),
-        productVariantCreate(getSimpleProductVariables(formData, productId))
+        productVariantCreate(getSimpleProductVariables(formData, productId)),
       ]);
-      const channelErrors = result[0].data?.productChannelListingUpdate?.errors;
-      const variantErrors = result[1].data?.productVariantCreate?.errors;
-
-      if ([...(channelErrors || []), ...(variantErrors || [])].length > 0) {
-        hasErrors = true;
-      }
+      const channelErrors =
+        result[0].data?.productChannelListingUpdate?.errors || [];
+      const variantErrors = result[1].data?.productVariantCreate?.errors || [];
+      errors = [...errors, ...channelErrors, ...variantErrors];
 
       const variantId = result[1].data.productVariantCreate.productVariant?.id;
       if (variantErrors.length === 0 && variantId) {
@@ -155,26 +161,26 @@ export function createHandler(
             input: formData.channelListings.map(listing => ({
               channelId: listing.id,
               costPrice: listing.costPrice || null,
-              price: listing.price
-            }))
-          }
+              price: listing.price,
+            })),
+          },
         });
       }
     } else {
       const result = await updateChannels(
-        getChannelsVariables(productId, formData.channelListings)
+        getChannelsVariables(productId, formData.channelListings),
       );
+      const channelErrors =
+        result.data?.productChannelListingUpdate?.errors || [];
 
-      if (result.data?.productChannelListingUpdate?.errors.length > 0) {
-        hasErrors = true;
-      }
+      errors = [...errors, ...channelErrors];
     }
 
     /*
      INFO: This is a stop-gap solution, where we delete products that didn't meet all required data in the create form
      A more robust solution would require merging create and update form into one to persist form state across redirects
     */
-    if (productId && hasErrors) {
+    if (productId && errors.length > 0) {
       await productDelete({ variables: { id: productId } });
 
       return { errors };

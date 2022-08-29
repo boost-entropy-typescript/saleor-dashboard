@@ -15,45 +15,46 @@ import { useIntl } from "react-intl";
 
 import FormSpacer from "../FormSpacer";
 import DateVisibilitySelector from "./DateVisibilitySelector";
+import { visibilityCardMessages } from "./messages";
 
 const useStyles = makeStyles(
   theme => ({
     checkbox: {
       alignItems: "flex-start",
-      marginTop: 10
+      marginTop: 10,
     },
     children: {
       "& button": {
-        margin: "0 9px"
+        margin: "0 9px",
       },
       "& label": {
-        marginTop: theme.spacing(2.5)
-      }
+        marginTop: theme.spacing(2.5),
+      },
     },
     date: {
       "& svg": {
-        fill: theme.palette.primary.main
+        fill: theme.palette.primary.main,
       },
-      marginTop: theme.spacing(1)
+      marginTop: theme.spacing(1),
     },
     label: {
       lineHeight: 1.2,
       marginBottom: 5,
-      marginTop: 0
+      marginTop: 0,
     },
     listingLabel: {
-      marginTop: 9
+      marginTop: 9,
     },
     secondLabel: {
       color: theme.palette.text.hint,
       fontSize: 12,
-      marginBottom: theme.spacing(2)
+      marginBottom: theme.spacing(2),
     },
     switchField: {
-      marginTop: theme.spacing(1)
-    }
+      marginTop: theme.spacing(1),
+    },
   }),
-  { name: "VisibilityCard" }
+  { name: "VisibilityCard" },
 );
 
 interface Message {
@@ -93,12 +94,12 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
       isAvailableForPurchase: isAvailable,
       isPublished,
       publicationDate,
-      visibleInListings
+      visibleInListings,
     },
     errors,
     disabled,
     messages,
-    onChange
+    onChange,
   } = props;
   const classes = useStyles(props);
   const intl = useIntl();
@@ -108,27 +109,20 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
     isAvailable !== undefined && availableForPurchase !== undefined;
 
   const visibleMessage = (date: string) =>
-    intl.formatMessage(
-      {
-        id: "UjsI4o",
-        defaultMessage: "since {date}",
-        description: "date"
-      },
-      {
-        date: localizeDate(date, "L")
-      }
-    );
+    intl.formatMessage(visibilityCardMessages.sinceDate, {
+      date: localizeDate(date),
+    });
 
   const handleRadioFieldChange = (type: keyof DateFields) => (
-    e: ChangeEvent
+    e: ChangeEvent,
   ) => {
     const { value } = e.target;
     if (!value) {
       onChange({
         target: {
           name: type,
-          value: null
-        }
+          value: null,
+        },
       });
     }
     return onChange(e);
@@ -136,13 +130,7 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
 
   return (
     <Card>
-      <CardTitle
-        title={intl.formatMessage({
-          id: "akXDST",
-          defaultMessage: "Visibility",
-          description: "section header"
-        })}
-      />
+      <CardTitle title={intl.formatMessage(visibilityCardMessages.title)} />
       <CardContent>
         <RadioSwitchField
           disabled={disabled}
@@ -178,10 +166,9 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
         />
         {!isPublished && (
           <DateVisibilitySelector
-            buttonText={intl.formatMessage({
-              id: "U3BQKA",
-              defaultMessage: "Set publication date"
-            })}
+            buttonText={intl.formatMessage(
+              visibilityCardMessages.setPublicationDate,
+            )}
             onInputClose={() =>
               onChange({ target: { name: "publicationDate", value: null } })
             }
@@ -189,11 +176,7 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
             <TextField
               error={!!getFieldError(errors, "publicationDate")}
               disabled={disabled}
-              label={intl.formatMessage({
-                id: "Jt3DwJ",
-                defaultMessage: "Publish on",
-                description: "publish on date"
-              })}
+              label={intl.formatMessage(visibilityCardMessages.publishOn)}
               name="publicationDate"
               type="date"
               fullWidth={true}
@@ -202,7 +185,7 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
               onChange={onChange}
               className={classes.date}
               InputLabelProps={{
-                shrink: true
+                shrink: true,
               }}
             />
           </DateVisibilitySelector>
@@ -253,18 +236,16 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
                 buttonText={messages.setAvailabilityDateLabel}
                 onInputClose={() =>
                   onChange({
-                    target: { name: "availableForPurchase", value: null }
+                    target: { name: "availableForPurchase", value: null },
                   })
                 }
               >
                 <TextField
                   error={!!getFieldError(errors, "startDate")}
                   disabled={disabled}
-                  label={intl.formatMessage({
-                    id: "Y7Vy19",
-                    defaultMessage: "Set available on",
-                    description: "available on date"
-                  })}
+                  label={intl.formatMessage(
+                    visibilityCardMessages.setAvailableOn,
+                  )}
                   name="availableForPurchase"
                   type="date"
                   fullWidth={true}
@@ -273,7 +254,7 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
                   onChange={onChange}
                   className={classes.date}
                   InputLabelProps={{
-                    shrink: true
+                    shrink: true,
                   }}
                 />
               </DateVisibilitySelector>
@@ -294,29 +275,32 @@ export const VisibilityCard: React.FC<VisibilityCardProps> = props => {
             <ControlledCheckbox
               className={classes.checkbox}
               name="visibleInListings"
-              checked={visibleInListings}
+              checked={!visibleInListings}
               disabled={disabled}
               label={
                 <>
                   <p
                     className={classNames(classes.label, classes.listingLabel)}
                   >
-                    {intl.formatMessage({
-                      id: "0cVk9I",
-                      defaultMessage: "Show in product listings"
-                    })}
+                    {intl.formatMessage(visibilityCardMessages.hideInListings)}
                   </p>
 
                   <span className={classes.secondLabel}>
-                    {intl.formatMessage({
-                      id: "5ukAFZ",
-                      defaultMessage:
-                        "Disabling this checkbox will remove product from search and category pages. It will be available on collection pages."
-                    })}
+                    {intl.formatMessage(
+                      visibilityCardMessages.hideInListingsDescription,
+                    )}
                   </span>
                 </>
               }
-              onChange={onChange}
+              onChange={event =>
+                onChange({
+                  ...event,
+                  target: {
+                    ...event.target,
+                    value: !event.target.value,
+                  },
+                })
+              }
             />
           </>
         )}

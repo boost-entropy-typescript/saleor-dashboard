@@ -13,7 +13,8 @@ export function createChannelByView({
   currency,
   slug = name,
   shippingZone,
-  defaultCountry = "Poland"
+  defaultCountry = "Poland",
+  warehouse,
 }) {
   cy.addAliasToGraphRequest("Channel")
     .get(CHANNELS_SELECTORS.createChannelButton)
@@ -34,22 +35,38 @@ export function createChannelByView({
   });
   cy.fillAutocompleteSelect(
     ADD_CHANNEL_FORM_SELECTORS.countryAutocompleteInput,
-    defaultCountry
+    defaultCountry,
   );
   if (shippingZone) {
     addShippingZone(shippingZone);
+  }
+  if (warehouse) {
+    addWarehouse(warehouse);
   }
   cy.get(ADD_CHANNEL_FORM_SELECTORS.saveButton).click();
 }
 
 export function addShippingZone(shippingZone) {
   cy.get(BUTTON_SELECTORS.expandIcon)
+    .first()
     .click()
     .get(ADD_CHANNEL_FORM_SELECTORS.addShippingZoneButton)
     .click()
     .fillAutocompleteSelect(
       ADD_CHANNEL_FORM_SELECTORS.shippingAutocompleteSelect,
-      shippingZone
+      shippingZone,
+    );
+}
+
+export function addWarehouse(warehouse) {
+  cy.get(BUTTON_SELECTORS.expandIcon)
+    .last()
+    .click()
+    .get(ADD_CHANNEL_FORM_SELECTORS.addWarehouseButton)
+    .click()
+    .fillAutocompleteSelect(
+      ADD_CHANNEL_FORM_SELECTORS.warehouseAutocompleteSelect,
+      warehouse,
     );
 }
 
@@ -91,13 +108,18 @@ export function selectChannelInDetailsPages(channelName) {
 
 export function selectChannelVariantInDetailsPage(channelName, attributeName) {
   cy.get(AVAILABLE_CHANNELS_FORM.menageChannelsButton).click();
-  cy.contains(SELECT_CHANNELS_TO_ASSIGN.expandChannelRow, channelName)
-    .find(BUTTON_SELECTORS.expandIcon)
-    .click();
-  cy.contains(SELECT_CHANNELS_TO_ASSIGN.expandChannelRow, channelName)
-    .contains(SELECT_CHANNELS_TO_ASSIGN.channelVariantRow, attributeName)
-    .find(BUTTON_SELECTORS.checkbox)
-    .click();
+  const channelsNames = Array.isArray(channelName)
+    ? channelName
+    : [channelName];
+  channelsNames.forEach(name => {
+    cy.contains(SELECT_CHANNELS_TO_ASSIGN.expandChannelRow, name)
+      .find(BUTTON_SELECTORS.expandIcon)
+      .click();
+    cy.contains(SELECT_CHANNELS_TO_ASSIGN.expandChannelRow, name)
+      .contains(SELECT_CHANNELS_TO_ASSIGN.channelVariantRow, attributeName)
+      .find(BUTTON_SELECTORS.checkbox)
+      .click();
+  });
   cy.get(SELECT_CHANNELS_TO_ASSIGN.selectChannelsForm)
     .find(BUTTON_SELECTORS.submit)
     .click({ force: true });

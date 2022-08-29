@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import {
   SearchOrderVariantDocument,
   SearchOrderVariantQuery,
-  SearchOrderVariantQueryVariables
+  SearchOrderVariantQueryVariables,
 } from "@saleor/graphql";
 import makeTopLevelSearch from "@saleor/hooks/makeTopLevelSearch";
 
@@ -49,18 +49,6 @@ export const searchOrderVariant = gql`
                 }
               }
               onSale
-            }
-            channelListings {
-              channel {
-                id
-                isActive
-                name
-                currencyCode
-              }
-              price {
-                amount
-                currency
-              }
             }
           }
         }

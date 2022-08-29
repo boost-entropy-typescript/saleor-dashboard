@@ -3,7 +3,7 @@ import { Card, CardContent, TextField, Typography } from "@material-ui/core";
 import CardTitle from "@saleor/components/CardTitle";
 import {
   StaffErrorFragment,
-  StaffMemberDetailsFragment
+  StaffMemberDetailsFragment,
 } from "@saleor/graphql";
 import { commonMessages } from "@saleor/intl";
 import { makeStyles } from "@saleor/macaw-ui";
@@ -19,10 +19,10 @@ const useStyles = makeStyles(
   theme => ({
     avatar: {
       "& svg": {
-        fill: "#fff"
+        fill: "#fff",
       },
       "&:hover $avatarHover": {
-        opacity: 1
+        opacity: 1,
       },
       alignItems: "center",
       borderRadius: "100%",
@@ -31,27 +31,27 @@ const useStyles = makeStyles(
       justifyContent: "center",
       overflow: "hidden",
       position: "relative",
-      width: 120
+      width: 120,
     },
     avatarActionText: {
       "&:hover": {
-        textDecoration: "underline"
+        textDecoration: "underline",
       },
       color: "#fff",
       cursor: "pointer",
-      fontSize: 12
+      fontSize: 12,
     },
     avatarDefault: {
       "& div": {
         color: "#fff",
         fontSize: 35,
         fontWeight: "bold",
-        lineHeight: "120px"
+        lineHeight: "120px",
       },
       background: theme.palette.primary.main,
       height: 120,
       textAlign: "center",
-      width: 120
+      width: 120,
     },
     avatarHover: {
       background: "#00000080",
@@ -65,17 +65,17 @@ const useStyles = makeStyles(
       textAlign: "center",
       textTransform: "uppercase",
       transition: "opacity 0.5s",
-      width: 120
+      width: 120,
     },
     avatarImage: {
       pointerEvents: "none",
-      width: "100%"
+      width: "100%",
     },
     fileField: {
-      display: "none"
+      display: "none",
     },
     prop: {
-      marginBottom: theme.spacing(2)
+      marginBottom: theme.spacing(2),
     },
     propGrid: {
       display: "grid",
@@ -83,16 +83,16 @@ const useStyles = makeStyles(
       gridRowGap: theme.spacing(1),
       gridTemplateColumns: "1fr 1fr",
       [theme.breakpoints.down("xs")]: {
-        gridTemplateColumns: "1fr"
-      }
+        gridTemplateColumns: "1fr",
+      },
     },
     root: {
       display: "grid",
       gridColumnGap: theme.spacing(4),
-      gridTemplateColumns: "120px 1fr"
-    }
+      gridTemplateColumns: "120px 1fr",
+    },
   }),
-  { name: "StaffProperties" }
+  { name: "StaffProperties" },
 );
 
 interface StaffPropertiesProps {
@@ -120,7 +120,7 @@ const StaffProperties: React.FC<StaffPropertiesProps> = props => {
     staffMember,
     onChange,
     onImageDelete,
-    onImageUpload
+    onImageUpload,
   } = props;
 
   const classes = useStyles(props);
@@ -128,9 +128,21 @@ const StaffProperties: React.FC<StaffPropertiesProps> = props => {
   const imgInputAnchor = React.createRef<HTMLInputElement>();
 
   const clickImgInput = () => imgInputAnchor.current.click();
-  const formErrors = getFormErrors(["id"], errors || []);
+  const formErrors = getFormErrors(
+    ["id", "firstName", "lastName", "email"],
+    errors || [],
+  );
 
   const hasAvatar = !!staffMember?.avatar?.url;
+
+  const getFieldProps = (name: string) => ({
+    disabled: props.disabled,
+    error: !!formErrors[name],
+    helperText: formErrors[name]?.message,
+    label: intl.formatMessage(commonMessages[name]),
+    name,
+    value: data[name],
+  });
 
   return (
     <Card className={className}>
@@ -138,7 +150,7 @@ const StaffProperties: React.FC<StaffPropertiesProps> = props => {
         title={intl.formatMessage({
           id: "VTITVe",
           defaultMessage: "Staff Member Information",
-          description: "section header"
+          description: "section header",
         })}
       />
       <CardContent>
@@ -197,27 +209,21 @@ const StaffProperties: React.FC<StaffPropertiesProps> = props => {
             <div className={classes.propGrid}>
               <div className={classes.prop}>
                 <TextField
-                  label={intl.formatMessage(commonMessages.firstName)}
-                  value={data.firstName}
-                  name="firstName"
+                  {...getFieldProps("firstName")}
                   onChange={onChange}
                   fullWidth
                 />
               </div>
               <div className={classes.prop}>
                 <TextField
-                  label={intl.formatMessage(commonMessages.lastName)}
-                  value={data.lastName}
-                  name="lastName"
+                  {...getFieldProps("lastName")}
                   onChange={onChange}
                   fullWidth
                 />
               </div>
               <div className={classes.prop}>
                 <TextField
-                  label={intl.formatMessage(commonMessages.email)}
-                  value={data.email}
-                  name="email"
+                  {...getFieldProps("email")}
                   onChange={onChange}
                   fullWidth
                 />

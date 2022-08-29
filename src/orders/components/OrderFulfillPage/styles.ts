@@ -3,34 +3,38 @@ import { makeStyles } from "@saleor/macaw-ui";
 export const useStyles = makeStyles(
   theme => ({
     colQuantityHeader: {
-      textAlign: "right"
+      textAlign: "right",
     },
     colStock: {
       textAlign: "right",
-      width: 180
+      width: 180,
     },
     colName: {
-      width: 250
+      width: 220,
     },
     colQuantity: {
       textAlign: "right",
-      width: 210
+      width: 210,
     },
     colSku: {
       textAlign: "right",
       textOverflow: "ellipsis",
-      width: 150
+      width: 100,
+    },
+    colWarehouse: {
+      textAlign: "right",
+      width: 200,
     },
     table: {
       "&&": {
-        tableLayout: "fixed"
-      }
+        tableLayout: "fixed",
+      },
     },
     shipmentInformationCard: {
       padding: theme.spacing(3),
       alignSelf: "start",
       display: "grid",
-      gridRowGap: theme.spacing(1)
+      gridRowGap: theme.spacing(1),
     },
     supportHeader: {
       textTransform: "uppercase",
@@ -39,11 +43,8 @@ export const useStyles = makeStyles(
       letterSpacing: "0.1em",
       fontSize: "12px",
       lineHeight: "160%",
-      marginBottom: theme.spacing(2)
+      marginBottom: theme.spacing(2),
     },
-    warehouseLabel: {
-      marginBottom: theme.spacing(4)
-    }
   }),
-  { name: "OrderFulfillPage" }
+  { name: "OrderFulfillPage" },
 );

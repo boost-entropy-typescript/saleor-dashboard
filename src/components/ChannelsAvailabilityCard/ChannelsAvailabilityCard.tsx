@@ -10,7 +10,7 @@ import { useIntl } from "react-intl";
 import ChannelAvailabilityItemContent from "./Channel/ChannelAvailabilityItemContent";
 import ChannelAvailabilityItemWrapper from "./Channel/ChannelAvailabilityItemWrapper";
 import ChannelsAvailabilityCardWrapper, {
-  ChannelsAvailabilityWrapperProps
+  ChannelsAvailabilityWrapperProps,
 } from "./ChannelsAvailabilityCardWrapper";
 import { useStyles } from "./styles";
 import { ChannelOpts, ChannelsAvailabilityError, Messages } from "./types";
@@ -44,7 +44,7 @@ export const ChannelsAvailability: React.FC<ChannelsAvailabilityCardProps> = pro
     messages,
     managePermissions,
     onChange,
-    openModal
+    openModal,
   } = props;
   const intl = useIntl();
   const localizeDate = useDateLocalize();
@@ -54,7 +54,7 @@ export const ChannelsAvailability: React.FC<ChannelsAvailabilityCardProps> = pro
     messages,
     channels,
     intl,
-    localizeDate
+    localizeDate,
   });
 
   return (
@@ -70,7 +70,11 @@ export const ChannelsAvailability: React.FC<ChannelsAvailabilityCardProps> = pro
               errors?.filter(error => error.channels.includes(data.id)) || [];
 
             return (
-              <ChannelAvailabilityItemWrapper messages={messages} data={data}>
+              <ChannelAvailabilityItemWrapper
+                key={data.id}
+                messages={channelsMessages[data.id]}
+                data={data}
+              >
                 <ChannelAvailabilityItemContent
                   data={data}
                   onChange={onChange}

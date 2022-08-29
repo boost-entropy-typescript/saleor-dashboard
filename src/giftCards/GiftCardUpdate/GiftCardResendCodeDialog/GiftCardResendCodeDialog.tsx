@@ -8,7 +8,7 @@ import SingleAutocompleteSelectField from "@saleor/components/SingleAutocomplete
 import { useChannelsQuery, useGiftCardResendMutation } from "@saleor/graphql";
 import useForm from "@saleor/hooks/useForm";
 import useNotifier from "@saleor/hooks/useNotifier";
-import { getBySlug } from "@saleor/products/components/ProductVariantCreatorPage/utils";
+import { getBySlug } from "@saleor/misc";
 import { DialogProps } from "@saleor/types";
 import commonErrorMessages from "@saleor/utils/errors/common";
 import { mapSlugNodeToChoice } from "@saleor/utils/maps";
@@ -34,7 +34,7 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
   const progressClasses = useProgressStyles();
 
   const {
-    giftCard: { boughtInChannel: initialChannelSlug }
+    giftCard: { boughtInChannel: initialChannelSlug },
   } = useGiftCardDetails();
 
   const [consentSelected, setConsentSelected] = useState(false);
@@ -49,25 +49,25 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
 
   const initialFormData: GiftCardResendCodeFormData = {
     email: "",
-    channelSlug: initialChannelSlug || ""
+    channelSlug: initialChannelSlug || "",
   };
 
   const {
-    giftCard: { id }
+    giftCard: { id },
   } = useGiftCardDetails();
 
   const handleSubmit = async ({
     email,
-    channelSlug
+    channelSlug,
   }: GiftCardResendCodeFormData) => {
     const result = await resendGiftCardCode({
       variables: {
         input: {
           id,
           email: email ? email : null,
-          channel: channelSlug
-        }
-      }
+          channel: channelSlug,
+        },
+      },
     });
 
     return result?.data?.giftCardResend?.errors;
@@ -75,12 +75,12 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
 
   const { data, change, submit, reset } = useForm(
     initialFormData,
-    handleSubmit
+    handleSubmit,
   );
 
   const [
     resendGiftCardCode,
-    resendGiftCardCodeOpts
+    resendGiftCardCodeOpts,
   ] = useGiftCardResendMutation({
     onCompleted: data => {
       const errors = data?.giftCardResend?.errors;
@@ -88,11 +88,11 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
       const notifierData: IMessage = !!errors?.length
         ? {
             status: "error",
-            text: intl.formatMessage(commonErrorMessages.unknownError)
+            text: intl.formatMessage(commonErrorMessages.unknownError),
           }
         : {
             status: "success",
-            text: intl.formatMessage(messages.successResendAlertText)
+            text: intl.formatMessage(messages.successResendAlertText),
           };
 
       notify(notifierData);
@@ -101,7 +101,7 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
         onClose();
         reset();
       }
-    }
+    },
   });
 
   const { loading, status, data: submitData } = resendGiftCardCodeOpts;
@@ -110,7 +110,7 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
     open,
     reset,
     apiErrors: submitData?.giftCardResend?.errors,
-    keys: ["email"]
+    keys: ["email"],
   });
 
   useEffect(reset, [consentSelected]);

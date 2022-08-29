@@ -79,6 +79,7 @@ export const fragmentOrderLine = gql`
       quantity
       warehouse {
         id
+        name
       }
     }
     variant {
@@ -89,6 +90,10 @@ export const fragmentOrderLine = gql`
       }
       stocks {
         ...Stock
+      }
+      product {
+        id
+        isAvailableForPurchase
       }
     }
     productName
@@ -342,9 +347,11 @@ export const fragmentOrderFulfillLine = gql`
     productName
     quantity
     allocations {
+      id
       quantity
       warehouse {
         id
+        name
       }
     }
     quantityFulfilled

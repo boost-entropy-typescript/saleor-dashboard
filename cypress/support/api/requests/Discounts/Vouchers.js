@@ -30,7 +30,10 @@ export function deleteVouchers(voucherId) {
   return cy.sendRequestWithQuery(mutation);
 }
 
-export function createVoucher({ name, productId, code = name, type, country }) {
+export function createVoucher(
+  { name, productId, code = name, type, country },
+  token,
+) {
   const discountTypeLines = getValueWithDefault(type, `type:${type}`);
   const countryLine = getValueWithDefault(country, `countries:["${country}"]`);
 
@@ -52,7 +55,7 @@ export function createVoucher({ name, productId, code = name, type, country }) {
       }
     }
   }`;
-  return cy.sendRequestWithQuery(mutation).its("body.data.voucherCreate");
+  return cy.sendRequestWithQuery(mutation, token).its("body.data");
 }
 
 export function addChannelToVoucher(voucherId, channelId, value) {
@@ -63,11 +66,15 @@ export function addChannelToVoucher(voucherId, channelId, value) {
         discountValue:"${value}"
       }
     }){
+      voucher{
+        id
+        code
+      }
       errors{
         field
         message
       }
     }
   }`;
-  return cy.sendRequestWithQuery(mutation);
+  return cy.sendRequestWithQuery(mutation).its("body.data");
 }

@@ -1,11 +1,11 @@
 import { permissions } from "@saleor/fixtures";
 import PermissionGroupDetailsPage, {
-  PermissionGroupDetailsPageProps
+  PermissionGroupDetailsPageProps,
 } from "@saleor/permissionGroups/components/PermissionGroupDetailsPage";
 import {
   emptyPermissionGroup,
   permissionGroup,
-  users
+  users,
 } from "@saleor/permissionGroups/fixtures";
 import Decorator from "@saleor/storybook/Decorator";
 import { storiesOf } from "@storybook/react";
@@ -16,7 +16,6 @@ const props: PermissionGroupDetailsPageProps = {
   errors: [],
   isChecked: () => false,
   members: users,
-  membersModified: false,
   onAssign: () => undefined,
   onSort: () => undefined,
   onSubmit: () => undefined,
@@ -29,7 +28,7 @@ const props: PermissionGroupDetailsPageProps = {
   sort: null,
   toggle: () => undefined,
   toggleAll: () => undefined,
-  toolbar: null
+  toolbar: null,
 };
 
 storiesOf("Views / Permission Groups / Permission Group Details", module)

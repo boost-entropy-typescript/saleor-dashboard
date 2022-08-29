@@ -2,7 +2,7 @@ import { storiesOf } from "@storybook/react";
 import React from "react";
 
 import OrderCustomerComponent, {
-  OrderCustomerProps
+  OrderCustomerProps,
 } from "../../../orders/components/OrderCustomer";
 import { clients, order as orderFixture } from "../../../orders/fixtures";
 import Decorator from "../../Decorator";
@@ -19,7 +19,8 @@ const props: Omit<OrderCustomerProps, "classes"> = {
   onProfileView: () => undefined,
   onShippingAddressEdit: undefined,
   order,
-  users: clients
+  users: clients,
+  errors: [],
 };
 
 const OrderCustomer = props => {
@@ -41,7 +42,7 @@ storiesOf("Orders / OrderCustomer", module)
       {...props}
       order={{
         ...order,
-        shippingAddress: { ...order.shippingAddress, id: "a2" }
+        shippingAddress: { ...order.shippingAddress, id: "a2" },
       }}
     />
   ))

@@ -1,15 +1,18 @@
 import { Card, CardContent, Typography } from "@material-ui/core";
+import { channelUrl } from "@saleor/channels/urls";
 import CardTitle from "@saleor/components/CardTitle";
+import Link from "@saleor/components/Link";
 import Skeleton from "@saleor/components/Skeleton";
+import { ChannelFragment } from "@saleor/graphql";
 import React from "react";
 import { useIntl } from "react-intl";
 
 export interface OrderChannelSectionCardProps {
-  selectedChannelName: string;
+  channel?: Pick<ChannelFragment, "id" | "name">;
 }
 
 export const OrderChannelSectionCard: React.FC<OrderChannelSectionCardProps> = ({
-  selectedChannelName
+  channel,
 }) => {
   const intl = useIntl();
 
@@ -19,14 +22,18 @@ export const OrderChannelSectionCard: React.FC<OrderChannelSectionCardProps> = (
         title={intl.formatMessage({
           id: "aY0HAT",
           defaultMessage: "Sales channel",
-          description: "section header"
+          description: "section header",
         })}
       />
       <CardContent>
-        {selectedChannelName === undefined ? (
+        {!channel ? (
           <Skeleton />
         ) : (
-          <Typography>{selectedChannelName}</Typography>
+          <Typography>
+            <Link href={channelUrl(channel.id) ?? ""} disabled={!channel.id}>
+              {channel.name ?? "..."}
+            </Link>
+          </Typography>
         )}
       </CardContent>
     </Card>

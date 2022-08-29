@@ -25,6 +25,7 @@ export const AppFragmentDoc = gql`
   type
   homepageUrl
   appUrl
+  manifestUrl
   configurationUrl
   supportUrl
   version
@@ -60,6 +61,7 @@ export const AppListItemFragmentDoc = gql`
   isActive
   type
   appUrl
+  manifestUrl
   permissions {
     ...AppPermission
   }
@@ -183,14 +185,27 @@ export const ChannelFragmentDoc = gql`
     code
     country
   }
+  stockSettings {
+    allocationStrategy
+  }
+}
+    `;
+export const WarehouseFragmentDoc = gql`
+    fragment Warehouse on Warehouse {
+  id
+  name
 }
     `;
 export const ChannelDetailsFragmentDoc = gql`
     fragment ChannelDetails on Channel {
   ...Channel
   hasOrders
+  warehouses {
+    ...Warehouse
+  }
 }
-    ${ChannelFragmentDoc}`;
+    ${ChannelFragmentDoc}
+${WarehouseFragmentDoc}`;
 export const CollectionFragmentDoc = gql`
     fragment Collection on Collection {
   id
@@ -585,6 +600,7 @@ export const OrderErrorFragmentDoc = gql`
   field
   addressType
   message
+  orderLines
 }
     `;
 export const OrderSettingsErrorFragmentDoc = gql`
@@ -1200,12 +1216,6 @@ export const OrderEventFragmentDoc = gql`
   }
 }
     `;
-export const WarehouseFragmentDoc = gql`
-    fragment Warehouse on Warehouse {
-  id
-  name
-}
-    `;
 export const StockFragmentDoc = gql`
     fragment Stock on Stock {
   id
@@ -1225,6 +1235,7 @@ export const OrderLineFragmentDoc = gql`
     quantity
     warehouse {
       id
+      name
     }
   }
   variant {
@@ -1235,6 +1246,10 @@ export const OrderLineFragmentDoc = gql`
     }
     stocks {
       ...Stock
+    }
+    product {
+      id
+      isAvailableForPurchase
     }
   }
   productName
@@ -1472,9 +1487,11 @@ export const OrderFulfillLineFragmentDoc = gql`
   productName
   quantity
   allocations {
+    id
     quantity
     warehouse {
       id
+      name
     }
   }
   quantityFulfilled
@@ -1570,6 +1587,7 @@ export const AttributeValueFragmentDoc = gql`
 export const AttributeValueDetailsFragmentDoc = gql`
     fragment AttributeValueDetails on AttributeValue {
   ...AttributeValue
+  plainText
   richText
 }
     ${AttributeValueFragmentDoc}`;
@@ -2654,6 +2672,21 @@ export const AttributeValueTranslatableContentFragmentDoc = gql`
   }
 }
     ${AttributeChoicesTranslationFragmentDoc}`;
+export const MenuItemTranslationFragmentDoc = gql`
+    fragment MenuItemTranslation on MenuItemTranslatableContent {
+  translation(languageCode: $language) {
+    id
+    language {
+      language
+    }
+    name
+  }
+  menuItem {
+    id
+    name
+  }
+}
+    `;
 export const WarehouseWithShippingFragmentDoc = gql`
     fragment WarehouseWithShipping on Warehouse {
   ...Warehouse
@@ -4361,6 +4394,46 @@ export function useChannelDeactivateMutation(baseOptions?: ApolloReactHooks.Muta
 export type ChannelDeactivateMutationHookResult = ReturnType<typeof useChannelDeactivateMutation>;
 export type ChannelDeactivateMutationResult = Apollo.MutationResult<Types.ChannelDeactivateMutation>;
 export type ChannelDeactivateMutationOptions = Apollo.BaseMutationOptions<Types.ChannelDeactivateMutation, Types.ChannelDeactivateMutationVariables>;
+export const ChannelReorderWarehousesDocument = gql`
+    mutation ChannelReorderWarehouses($channelId: ID!, $moves: [ReorderInput!]!) {
+  channelReorderWarehouses(channelId: $channelId, moves: $moves) {
+    channel {
+      ...ChannelDetails
+    }
+    errors {
+      ...ChannelError
+    }
+  }
+}
+    ${ChannelDetailsFragmentDoc}
+${ChannelErrorFragmentDoc}`;
+export type ChannelReorderWarehousesMutationFn = Apollo.MutationFunction<Types.ChannelReorderWarehousesMutation, Types.ChannelReorderWarehousesMutationVariables>;
+
+/**
+ * __useChannelReorderWarehousesMutation__
+ *
+ * To run a mutation, you first call `useChannelReorderWarehousesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChannelReorderWarehousesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [channelReorderWarehousesMutation, { data, loading, error }] = useChannelReorderWarehousesMutation({
+ *   variables: {
+ *      channelId: // value for 'channelId'
+ *      moves: // value for 'moves'
+ *   },
+ * });
+ */
+export function useChannelReorderWarehousesMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<Types.ChannelReorderWarehousesMutation, Types.ChannelReorderWarehousesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<Types.ChannelReorderWarehousesMutation, Types.ChannelReorderWarehousesMutationVariables>(ChannelReorderWarehousesDocument, options);
+      }
+export type ChannelReorderWarehousesMutationHookResult = ReturnType<typeof useChannelReorderWarehousesMutation>;
+export type ChannelReorderWarehousesMutationResult = Apollo.MutationResult<Types.ChannelReorderWarehousesMutation>;
+export type ChannelReorderWarehousesMutationOptions = Apollo.BaseMutationOptions<Types.ChannelReorderWarehousesMutation, Types.ChannelReorderWarehousesMutationVariables>;
 export const BaseChannelsDocument = gql`
     query BaseChannels {
   channels {
@@ -8734,12 +8807,15 @@ export const OrderLineDeleteDocument = gql`
       ...OrderError
     }
     order {
-      ...OrderDetails
+      id
+      lines {
+        ...OrderLine
+      }
     }
   }
 }
     ${OrderErrorFragmentDoc}
-${OrderDetailsFragmentDoc}`;
+${OrderLineFragmentDoc}`;
 export type OrderLineDeleteMutationFn = Apollo.MutationFunction<Types.OrderLineDeleteMutation, Types.OrderLineDeleteMutationVariables>;
 
 /**
@@ -8773,12 +8849,15 @@ export const OrderLinesAddDocument = gql`
       ...OrderError
     }
     order {
-      ...OrderDetails
+      id
+      lines {
+        ...OrderLine
+      }
     }
   }
 }
     ${OrderErrorFragmentDoc}
-${OrderDetailsFragmentDoc}`;
+${OrderLineFragmentDoc}`;
 export type OrderLinesAddMutationFn = Apollo.MutationFunction<Types.OrderLinesAddMutation, Types.OrderLinesAddMutationVariables>;
 
 /**
@@ -8812,13 +8891,13 @@ export const OrderLineUpdateDocument = gql`
     errors {
       ...OrderError
     }
-    order {
-      ...OrderDetails
+    orderLine {
+      ...OrderLine
     }
   }
 }
     ${OrderErrorFragmentDoc}
-${OrderDetailsFragmentDoc}`;
+${OrderLineFragmentDoc}`;
 export type OrderLineUpdateMutationFn = Apollo.MutationFunction<Types.OrderLineUpdateMutation, Types.OrderLineUpdateMutationVariables>;
 
 /**
@@ -8852,7 +8931,6 @@ export const FulfillOrderDocument = gql`
     errors {
       ...OrderError
       warehouse
-      orderLines
     }
     order {
       ...OrderDetails
@@ -9402,6 +9480,41 @@ export function useOrderRefundDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type OrderRefundDataQueryHookResult = ReturnType<typeof useOrderRefundDataQuery>;
 export type OrderRefundDataLazyQueryHookResult = ReturnType<typeof useOrderRefundDataLazyQuery>;
 export type OrderRefundDataQueryResult = Apollo.QueryResult<Types.OrderRefundDataQuery, Types.OrderRefundDataQueryVariables>;
+export const ChannelUsabilityDataDocument = gql`
+    query ChannelUsabilityData($channel: String!) {
+  products(channel: $channel) {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useChannelUsabilityDataQuery__
+ *
+ * To run a query within a React component, call `useChannelUsabilityDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChannelUsabilityDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChannelUsabilityDataQuery({
+ *   variables: {
+ *      channel: // value for 'channel'
+ *   },
+ * });
+ */
+export function useChannelUsabilityDataQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.ChannelUsabilityDataQuery, Types.ChannelUsabilityDataQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.ChannelUsabilityDataQuery, Types.ChannelUsabilityDataQueryVariables>(ChannelUsabilityDataDocument, options);
+      }
+export function useChannelUsabilityDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.ChannelUsabilityDataQuery, Types.ChannelUsabilityDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.ChannelUsabilityDataQuery, Types.ChannelUsabilityDataQueryVariables>(ChannelUsabilityDataDocument, options);
+        }
+export type ChannelUsabilityDataQueryHookResult = ReturnType<typeof useChannelUsabilityDataQuery>;
+export type ChannelUsabilityDataLazyQueryHookResult = ReturnType<typeof useChannelUsabilityDataLazyQuery>;
+export type ChannelUsabilityDataQueryResult = Apollo.QueryResult<Types.ChannelUsabilityDataQuery, Types.ChannelUsabilityDataQueryVariables>;
 export const PageTypeUpdateDocument = gql`
     mutation PageTypeUpdate($id: ID!, $input: PageTypeUpdateInput!) {
   pageTypeUpdate(id: $id, input: $input) {
@@ -11691,42 +11804,6 @@ export function useProductBulkDeleteMutation(baseOptions?: ApolloReactHooks.Muta
 export type ProductBulkDeleteMutationHookResult = ReturnType<typeof useProductBulkDeleteMutation>;
 export type ProductBulkDeleteMutationResult = Apollo.MutationResult<Types.ProductBulkDeleteMutation>;
 export type ProductBulkDeleteMutationOptions = Apollo.BaseMutationOptions<Types.ProductBulkDeleteMutation, Types.ProductBulkDeleteMutationVariables>;
-export const ProductVariantBulkCreateDocument = gql`
-    mutation ProductVariantBulkCreate($id: ID!, $inputs: [ProductVariantBulkCreateInput!]!) {
-  productVariantBulkCreate(product: $id, variants: $inputs) {
-    errors {
-      ...BulkProductError
-    }
-  }
-}
-    ${BulkProductErrorFragmentDoc}`;
-export type ProductVariantBulkCreateMutationFn = Apollo.MutationFunction<Types.ProductVariantBulkCreateMutation, Types.ProductVariantBulkCreateMutationVariables>;
-
-/**
- * __useProductVariantBulkCreateMutation__
- *
- * To run a mutation, you first call `useProductVariantBulkCreateMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useProductVariantBulkCreateMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [productVariantBulkCreateMutation, { data, loading, error }] = useProductVariantBulkCreateMutation({
- *   variables: {
- *      id: // value for 'id'
- *      inputs: // value for 'inputs'
- *   },
- * });
- */
-export function useProductVariantBulkCreateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<Types.ProductVariantBulkCreateMutation, Types.ProductVariantBulkCreateMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<Types.ProductVariantBulkCreateMutation, Types.ProductVariantBulkCreateMutationVariables>(ProductVariantBulkCreateDocument, options);
-      }
-export type ProductVariantBulkCreateMutationHookResult = ReturnType<typeof useProductVariantBulkCreateMutation>;
-export type ProductVariantBulkCreateMutationResult = Apollo.MutationResult<Types.ProductVariantBulkCreateMutation>;
-export type ProductVariantBulkCreateMutationOptions = Apollo.BaseMutationOptions<Types.ProductVariantBulkCreateMutation, Types.ProductVariantBulkCreateMutationVariables>;
 export const ProductVariantBulkDeleteDocument = gql`
     mutation ProductVariantBulkDelete($ids: [ID!]!) {
   productVariantBulkDelete(ids: $ids) {
@@ -12427,6 +12504,9 @@ export const ProductVariantCreateDataDocument = gql`
     thumbnail {
       url
     }
+    defaultVariant {
+      id
+    }
     variants {
       id
       name
@@ -12563,53 +12643,6 @@ export function useGridAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQu
 export type GridAttributesQueryHookResult = ReturnType<typeof useGridAttributesQuery>;
 export type GridAttributesLazyQueryHookResult = ReturnType<typeof useGridAttributesLazyQuery>;
 export type GridAttributesQueryResult = Apollo.QueryResult<Types.GridAttributesQuery, Types.GridAttributesQueryVariables>;
-export const CreateMultipleVariantsDataDocument = gql`
-    query CreateMultipleVariantsData($id: ID!, $firstValues: Int, $afterValues: String, $lastValues: Int, $beforeValues: String) {
-  product(id: $id) {
-    ...ProductVariantAttributes
-  }
-  warehouses(first: 20) {
-    edges {
-      node {
-        ...Warehouse
-      }
-    }
-  }
-}
-    ${ProductVariantAttributesFragmentDoc}
-${WarehouseFragmentDoc}`;
-
-/**
- * __useCreateMultipleVariantsDataQuery__
- *
- * To run a query within a React component, call `useCreateMultipleVariantsDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useCreateMultipleVariantsDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCreateMultipleVariantsDataQuery({
- *   variables: {
- *      id: // value for 'id'
- *      firstValues: // value for 'firstValues'
- *      afterValues: // value for 'afterValues'
- *      lastValues: // value for 'lastValues'
- *      beforeValues: // value for 'beforeValues'
- *   },
- * });
- */
-export function useCreateMultipleVariantsDataQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.CreateMultipleVariantsDataQuery, Types.CreateMultipleVariantsDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<Types.CreateMultipleVariantsDataQuery, Types.CreateMultipleVariantsDataQueryVariables>(CreateMultipleVariantsDataDocument, options);
-      }
-export function useCreateMultipleVariantsDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.CreateMultipleVariantsDataQuery, Types.CreateMultipleVariantsDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<Types.CreateMultipleVariantsDataQuery, Types.CreateMultipleVariantsDataQueryVariables>(CreateMultipleVariantsDataDocument, options);
-        }
-export type CreateMultipleVariantsDataQueryHookResult = ReturnType<typeof useCreateMultipleVariantsDataQuery>;
-export type CreateMultipleVariantsDataLazyQueryHookResult = ReturnType<typeof useCreateMultipleVariantsDataLazyQuery>;
-export type CreateMultipleVariantsDataQueryResult = Apollo.QueryResult<Types.CreateMultipleVariantsDataQuery, Types.CreateMultipleVariantsDataQueryVariables>;
 export const SearchAttributesDocument = gql`
     query SearchAttributes($after: String, $first: Int!, $query: String!) {
   search: attributes(after: $after, first: $first, filter: {search: $query}) {
@@ -13075,18 +13108,6 @@ export const SearchOrderVariantDocument = gql`
             }
             onSale
           }
-          channelListings {
-            channel {
-              id
-              isActive
-              name
-              currencyCode
-            }
-            price {
-              amount
-              currency
-            }
-          }
         }
       }
     }
@@ -13493,6 +13514,7 @@ export const SearchWarehousesDocument = gql`
     sortBy: {direction: ASC, field: NAME}
     filter: {search: $query}
   ) {
+    totalCount
     edges {
       node {
         id
@@ -14178,8 +14200,42 @@ export function useChannelShippingZonesLazyQuery(baseOptions?: ApolloReactHooks.
 export type ChannelShippingZonesQueryHookResult = ReturnType<typeof useChannelShippingZonesQuery>;
 export type ChannelShippingZonesLazyQueryHookResult = ReturnType<typeof useChannelShippingZonesLazyQuery>;
 export type ChannelShippingZonesQueryResult = Apollo.QueryResult<Types.ChannelShippingZonesQuery, Types.ChannelShippingZonesQueryVariables>;
+export const ShippingZonesCountDocument = gql`
+    query ShippingZonesCount {
+  shippingZones {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useShippingZonesCountQuery__
+ *
+ * To run a query within a React component, call `useShippingZonesCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useShippingZonesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useShippingZonesCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useShippingZonesCountQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<Types.ShippingZonesCountQuery, Types.ShippingZonesCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.ShippingZonesCountQuery, Types.ShippingZonesCountQueryVariables>(ShippingZonesCountDocument, options);
+      }
+export function useShippingZonesCountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.ShippingZonesCountQuery, Types.ShippingZonesCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.ShippingZonesCountQuery, Types.ShippingZonesCountQueryVariables>(ShippingZonesCountDocument, options);
+        }
+export type ShippingZonesCountQueryHookResult = ReturnType<typeof useShippingZonesCountQuery>;
+export type ShippingZonesCountLazyQueryHookResult = ReturnType<typeof useShippingZonesCountLazyQuery>;
+export type ShippingZonesCountQueryResult = Apollo.QueryResult<Types.ShippingZonesCountQuery, Types.ShippingZonesCountQueryVariables>;
 export const ShopSettingsUpdateDocument = gql`
-    mutation ShopSettingsUpdate($shopSettingsInput: ShopSettingsInput!, $addressInput: AddressInput, $isCloudInstance: Boolean!) {
+    mutation ShopSettingsUpdate($shopSettingsInput: ShopSettingsInput!, $addressInput: AddressInput) {
   shopSettingsUpdate(input: $shopSettingsInput) {
     errors {
       ...ShopError
@@ -14219,7 +14275,6 @@ export type ShopSettingsUpdateMutationFn = Apollo.MutationFunction<Types.ShopSet
  *   variables: {
  *      shopSettingsInput: // value for 'shopSettingsInput'
  *      addressInput: // value for 'addressInput'
- *      isCloudInstance: // value for 'isCloudInstance'
  *   },
  * });
  */
@@ -15235,6 +15290,55 @@ export function useUpdateShippingMethodTranslationsMutation(baseOptions?: Apollo
 export type UpdateShippingMethodTranslationsMutationHookResult = ReturnType<typeof useUpdateShippingMethodTranslationsMutation>;
 export type UpdateShippingMethodTranslationsMutationResult = Apollo.MutationResult<Types.UpdateShippingMethodTranslationsMutation>;
 export type UpdateShippingMethodTranslationsMutationOptions = Apollo.BaseMutationOptions<Types.UpdateShippingMethodTranslationsMutation, Types.UpdateShippingMethodTranslationsMutationVariables>;
+export const UpdateMenuItemTranslationsDocument = gql`
+    mutation UpdateMenuItemTranslations($id: ID!, $input: NameTranslationInput!, $language: LanguageCodeEnum!) {
+  menuItemTranslate(id: $id, input: $input, languageCode: $language) {
+    errors {
+      field
+      message
+    }
+    menuItem {
+      id
+      name
+      translation(languageCode: $language) {
+        id
+        language {
+          language
+        }
+        name
+      }
+    }
+  }
+}
+    `;
+export type UpdateMenuItemTranslationsMutationFn = Apollo.MutationFunction<Types.UpdateMenuItemTranslationsMutation, Types.UpdateMenuItemTranslationsMutationVariables>;
+
+/**
+ * __useUpdateMenuItemTranslationsMutation__
+ *
+ * To run a mutation, you first call `useUpdateMenuItemTranslationsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMenuItemTranslationsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMenuItemTranslationsMutation, { data, loading, error }] = useUpdateMenuItemTranslationsMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *      language: // value for 'language'
+ *   },
+ * });
+ */
+export function useUpdateMenuItemTranslationsMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<Types.UpdateMenuItemTranslationsMutation, Types.UpdateMenuItemTranslationsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<Types.UpdateMenuItemTranslationsMutation, Types.UpdateMenuItemTranslationsMutationVariables>(UpdateMenuItemTranslationsDocument, options);
+      }
+export type UpdateMenuItemTranslationsMutationHookResult = ReturnType<typeof useUpdateMenuItemTranslationsMutation>;
+export type UpdateMenuItemTranslationsMutationResult = Apollo.MutationResult<Types.UpdateMenuItemTranslationsMutation>;
+export type UpdateMenuItemTranslationsMutationOptions = Apollo.BaseMutationOptions<Types.UpdateMenuItemTranslationsMutation, Types.UpdateMenuItemTranslationsMutationVariables>;
 export const CategoryTranslationsDocument = gql`
     query CategoryTranslations($language: LanguageCodeEnum!, $first: Int, $after: String, $last: Int, $before: String) {
   translations(
@@ -15659,6 +15763,59 @@ export function useShippingMethodTranslationsLazyQuery(baseOptions?: ApolloReact
 export type ShippingMethodTranslationsQueryHookResult = ReturnType<typeof useShippingMethodTranslationsQuery>;
 export type ShippingMethodTranslationsLazyQueryHookResult = ReturnType<typeof useShippingMethodTranslationsLazyQuery>;
 export type ShippingMethodTranslationsQueryResult = Apollo.QueryResult<Types.ShippingMethodTranslationsQuery, Types.ShippingMethodTranslationsQueryVariables>;
+export const MenuItemTranslationsDocument = gql`
+    query MenuItemTranslations($language: LanguageCodeEnum!, $first: Int, $after: String, $last: Int, $before: String) {
+  translations(
+    kind: MENU_ITEM
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+  ) {
+    edges {
+      node {
+        ...MenuItemTranslation
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${MenuItemTranslationFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useMenuItemTranslationsQuery__
+ *
+ * To run a query within a React component, call `useMenuItemTranslationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMenuItemTranslationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMenuItemTranslationsQuery({
+ *   variables: {
+ *      language: // value for 'language'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useMenuItemTranslationsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.MenuItemTranslationsQuery, Types.MenuItemTranslationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.MenuItemTranslationsQuery, Types.MenuItemTranslationsQueryVariables>(MenuItemTranslationsDocument, options);
+      }
+export function useMenuItemTranslationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.MenuItemTranslationsQuery, Types.MenuItemTranslationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.MenuItemTranslationsQuery, Types.MenuItemTranslationsQueryVariables>(MenuItemTranslationsDocument, options);
+        }
+export type MenuItemTranslationsQueryHookResult = ReturnType<typeof useMenuItemTranslationsQuery>;
+export type MenuItemTranslationsLazyQueryHookResult = ReturnType<typeof useMenuItemTranslationsLazyQuery>;
+export type MenuItemTranslationsQueryResult = Apollo.QueryResult<Types.MenuItemTranslationsQuery, Types.MenuItemTranslationsQueryVariables>;
 export const ProductTranslationDetailsDocument = gql`
     query ProductTranslationDetails($id: ID!, $language: LanguageCodeEnum!) {
   translation(kind: PRODUCT, id: $id) {
@@ -16027,6 +16184,42 @@ export function useShippingMethodTranslationDetailsLazyQuery(baseOptions?: Apoll
 export type ShippingMethodTranslationDetailsQueryHookResult = ReturnType<typeof useShippingMethodTranslationDetailsQuery>;
 export type ShippingMethodTranslationDetailsLazyQueryHookResult = ReturnType<typeof useShippingMethodTranslationDetailsLazyQuery>;
 export type ShippingMethodTranslationDetailsQueryResult = Apollo.QueryResult<Types.ShippingMethodTranslationDetailsQuery, Types.ShippingMethodTranslationDetailsQueryVariables>;
+export const MenuItemTranslationDetailsDocument = gql`
+    query MenuItemTranslationDetails($id: ID!, $language: LanguageCodeEnum!) {
+  translation(kind: MENU_ITEM, id: $id) {
+    ...MenuItemTranslation
+  }
+}
+    ${MenuItemTranslationFragmentDoc}`;
+
+/**
+ * __useMenuItemTranslationDetailsQuery__
+ *
+ * To run a query within a React component, call `useMenuItemTranslationDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMenuItemTranslationDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMenuItemTranslationDetailsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      language: // value for 'language'
+ *   },
+ * });
+ */
+export function useMenuItemTranslationDetailsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.MenuItemTranslationDetailsQuery, Types.MenuItemTranslationDetailsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.MenuItemTranslationDetailsQuery, Types.MenuItemTranslationDetailsQueryVariables>(MenuItemTranslationDetailsDocument, options);
+      }
+export function useMenuItemTranslationDetailsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.MenuItemTranslationDetailsQuery, Types.MenuItemTranslationDetailsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.MenuItemTranslationDetailsQuery, Types.MenuItemTranslationDetailsQueryVariables>(MenuItemTranslationDetailsDocument, options);
+        }
+export type MenuItemTranslationDetailsQueryHookResult = ReturnType<typeof useMenuItemTranslationDetailsQuery>;
+export type MenuItemTranslationDetailsLazyQueryHookResult = ReturnType<typeof useMenuItemTranslationDetailsLazyQuery>;
+export type MenuItemTranslationDetailsQueryResult = Apollo.QueryResult<Types.MenuItemTranslationDetailsQuery, Types.MenuItemTranslationDetailsQueryVariables>;
 export const UpdateMetadataDocument = gql`
     mutation UpdateMetadata($id: ID!, $input: [MetadataInput!]!, $keysToDelete: [String!]!) {
   updateMetadata(id: $id, input: $input) {
@@ -16341,6 +16534,40 @@ export function useWarehouseDetailsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type WarehouseDetailsQueryHookResult = ReturnType<typeof useWarehouseDetailsQuery>;
 export type WarehouseDetailsLazyQueryHookResult = ReturnType<typeof useWarehouseDetailsLazyQuery>;
 export type WarehouseDetailsQueryResult = Apollo.QueryResult<Types.WarehouseDetailsQuery, Types.WarehouseDetailsQueryVariables>;
+export const WarehousesCountDocument = gql`
+    query WarehousesCount {
+  warehouses {
+    totalCount
+  }
+}
+    `;
+
+/**
+ * __useWarehousesCountQuery__
+ *
+ * To run a query within a React component, call `useWarehousesCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWarehousesCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWarehousesCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useWarehousesCountQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<Types.WarehousesCountQuery, Types.WarehousesCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.WarehousesCountQuery, Types.WarehousesCountQueryVariables>(WarehousesCountDocument, options);
+      }
+export function useWarehousesCountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.WarehousesCountQuery, Types.WarehousesCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.WarehousesCountQuery, Types.WarehousesCountQueryVariables>(WarehousesCountDocument, options);
+        }
+export type WarehousesCountQueryHookResult = ReturnType<typeof useWarehousesCountQuery>;
+export type WarehousesCountLazyQueryHookResult = ReturnType<typeof useWarehousesCountLazyQuery>;
+export type WarehousesCountQueryResult = Apollo.QueryResult<Types.WarehousesCountQuery, Types.WarehousesCountQueryVariables>;
 export const WebhookCreateDocument = gql`
     mutation WebhookCreate($input: WebhookCreateInput!) {
   webhookCreate(input: $input) {

@@ -4,45 +4,55 @@ export const useTableStyles = makeStyles(
   theme => ({
     cardCodeContainer: {
       display: "flex",
-      alignItems: "baseline"
+      alignItems: "baseline",
     },
     colCardCode: {
       paddingLeft: 0,
-      width: 400
+      width: 400,
     },
     colDelete: {
-      width: 88
+      width: 88,
     },
     colBalance: {
-      width: 135
+      width: 135,
+    },
+    colProduct: {
+      width: 250,
     },
     colBase: {
-      width: 150
+      width: 150,
+    },
+    pill: {
+      display: "block",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      maxWidth: "min-content",
+      overflow: "hidden",
     },
     row: {
       cursor: "pointer",
       height: 70,
       "& td, & th": {
-        height: "auto"
-      }
+        height: "auto",
+      },
     },
     skeleton: {
-      paddingLeft: 0
+      paddingLeft: 0,
     },
     toolbar: {
       display: "flex",
       gap: theme.spacing(),
-      marginRight: theme.spacing(-0.5)
-    }
+      marginRight: theme.spacing(-0.5),
+    },
   }),
-  { name: "GiftCardsListTable" }
+  { name: "GiftCardsListTable" },
 );
 
 export const useHeaderStyles = makeStyles(
   theme => ({
     alertLink: {
-      fontSize: theme.typography.body2.fontSize
-    }
+      fontSize: theme.typography.body2.fontSize,
+    },
   }),
-  { name: "GiftCardsListHeader" }
+  { name: "GiftCardsListHeader" },
 );

@@ -208,6 +208,9 @@ export const productVariantCreateQuery = gql`
       thumbnail {
         url
       }
+      defaultVariant {
+        id
+      }
       variants {
         id
         name
@@ -252,27 +255,6 @@ export const gridAttributes = gql`
         node {
           id
           name
-        }
-      }
-    }
-  }
-`;
-
-export const createMultipleVariantsData = gql`
-  query CreateMultipleVariantsData(
-    $id: ID!
-    $firstValues: Int
-    $afterValues: String
-    $lastValues: Int
-    $beforeValues: String
-  ) {
-    product(id: $id) {
-      ...ProductVariantAttributes
-    }
-    warehouses(first: 20) {
-      edges {
-        node {
-          ...Warehouse
         }
       }
     }

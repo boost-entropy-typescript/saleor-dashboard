@@ -4,7 +4,7 @@ import {
   OrderLineFragment,
   OrderRefundDataQuery,
   OrderStatus,
-  PaymentChargeStatusEnum
+  PaymentChargeStatusEnum,
 } from "@saleor/graphql";
 import { FormsetData } from "@saleor/hooks/useFormset";
 
@@ -18,7 +18,7 @@ import {
   getWarehousesFromOrderLines,
   mergeRepeatedOrderLines,
   OrderLineWithStockWarehouses,
-  OrderWithTotalAndTotalCaptured
+  OrderWithTotalAndTotalCaptured,
 } from "./data";
 
 const orderBase: OrderDetailsFragment = {
@@ -35,7 +35,7 @@ const orderBase: OrderDetailsFragment = {
     country: {
       __typename: "CountryDisplay",
       code: "SE",
-      country: "Szwecja"
+      country: "Szwecja",
     },
     countryArea: "",
     firstName: "Elizabeth",
@@ -44,7 +44,7 @@ const orderBase: OrderDetailsFragment = {
     phone: "",
     postalCode: "52203",
     streetAddress1: "419 Ruiz Orchard Apt. 199",
-    streetAddress2: ""
+    streetAddress2: "",
   },
   created: "2018-09-11T09:37:30.124154+00:00",
   id: "T3JkZXI6MTk=",
@@ -57,9 +57,9 @@ const orderBase: OrderDetailsFragment = {
     gross: {
       __typename: "Money",
       amount: 1215.89,
-      currency: "USD"
-    }
-  }
+      currency: "USD",
+    },
+  },
 };
 
 describe("Get warehouses used in order", () => {
@@ -72,18 +72,18 @@ describe("Get warehouses used in order", () => {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-1",
-                name: "Warehouse 1"
-              }
+                name: "Warehouse 1",
+              },
             },
             {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-2",
-                name: "Warehouse 2"
-              }
-            }
-          ]
-        }
+                name: "Warehouse 2",
+              },
+            },
+          ],
+        },
       },
       {
         variant: {
@@ -92,18 +92,18 @@ describe("Get warehouses used in order", () => {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-1",
-                name: "Warehouse 1"
-              }
+                name: "Warehouse 1",
+              },
             },
             {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-2",
-                name: "Warehouse 2"
-              }
-            }
-          ]
-        }
+                name: "Warehouse 2",
+              },
+            },
+          ],
+        },
       },
       {
         variant: {
@@ -112,19 +112,19 @@ describe("Get warehouses used in order", () => {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-2",
-                name: "Warehouse 2"
-              }
+                name: "Warehouse 2",
+              },
             },
             {
               warehouse: {
                 __typename: "Warehouse",
                 id: "warehouse-3",
-                name: "Warehouse 3"
-              }
-            }
-          ]
-        }
-      }
+                name: "Warehouse 3",
+              },
+            },
+          ],
+        },
+      },
     ];
 
     const orderWarehouses = getWarehousesFromOrderLines(lines);
@@ -141,14 +141,14 @@ describe("Get previously refunded price", () => {
         gross: {
           __typename: "Money",
           amount: 160,
-          currency: "USD"
-        }
+          currency: "USD",
+        },
       },
       totalCaptured: {
         __typename: "Money",
         amount: 100,
-        currency: "USD"
-      }
+        currency: "USD",
+      },
     };
 
     const refundedPrice = getPreviouslyRefundedPrice(order);
@@ -171,9 +171,9 @@ describe("Get refunded lines price sum", () => {
         gross: {
           __typename: "Money",
           amount: 10,
-          currency: "USD"
-        }
-      }
+          currency: "USD",
+        },
+      },
     },
     {
       __typename: "OrderLine",
@@ -187,9 +187,9 @@ describe("Get refunded lines price sum", () => {
         gross: {
           __typename: "Money",
           amount: 6,
-          currency: "USD"
-        }
-      }
+          currency: "USD",
+        },
+      },
     },
     {
       __typename: "OrderLine",
@@ -203,10 +203,10 @@ describe("Get refunded lines price sum", () => {
         gross: {
           __typename: "Money",
           amount: 4,
-          currency: "USD"
-        }
-      }
-    }
+          currency: "USD",
+        },
+      },
+    },
   ];
 
   it("is able to sum lines prices", () => {
@@ -215,25 +215,25 @@ describe("Get refunded lines price sum", () => {
         data: null,
         id: "1",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "2",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "3",
         label: null,
-        value: "1"
-      }
+        value: "1",
+      },
     ];
 
     const refundedLinesPriceSum = getRefundedLinesPriceSum(
       lines,
-      refundedProductQuantities
+      refundedProductQuantities,
     );
 
     expect(refundedLinesPriceSum).toBe(20);
@@ -245,25 +245,25 @@ describe("Get refunded lines price sum", () => {
         data: null,
         id: "1",
         label: null,
-        value: "0"
+        value: "0",
       },
       {
         data: null,
         id: "2",
         label: null,
-        value: "2"
+        value: "2",
       },
       {
         data: null,
         id: "3",
         label: null,
-        value: "4"
-      }
+        value: "4",
+      },
     ];
 
     const refundedLinesPriceSum = getRefundedLinesPriceSum(
       lines,
-      refundedProductQuantities
+      refundedProductQuantities,
     );
 
     expect(refundedLinesPriceSum).toBe(28);
@@ -291,14 +291,14 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 10,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
-      status: FulfillmentStatus.FULFILLED
+      status: FulfillmentStatus.FULFILLED,
     },
     {
       __typename: "Fulfillment",
@@ -319,11 +319,11 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 6,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
+          quantity: 1,
         },
         {
           __typename: "FulfillmentLine",
@@ -339,14 +339,14 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 6,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
-      status: FulfillmentStatus.FULFILLED
+      status: FulfillmentStatus.FULFILLED,
     },
     {
       __typename: "Fulfillment",
@@ -367,11 +367,11 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 4,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
+          quantity: 1,
         },
         {
           __typename: "FulfillmentLine",
@@ -387,11 +387,11 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 4,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
+          quantity: 1,
         },
         {
           __typename: "FulfillmentLine",
@@ -407,15 +407,15 @@ describe("Get get all fulfillment lines price sum", () => {
               gross: {
                 __typename: "Money",
                 amount: 4,
-                currency: "USD"
-              }
-            }
+                currency: "USD",
+              },
+            },
           },
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
-      status: FulfillmentStatus.FULFILLED
-    }
+      status: FulfillmentStatus.FULFILLED,
+    },
   ];
 
   it("is able to sum fulfillment lines prices", () => {
@@ -424,43 +424,43 @@ describe("Get get all fulfillment lines price sum", () => {
         data: null,
         id: "1-fulfillment-1",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "2-fulfillment-1",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "2-fulfillment-2",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "3-fulfillment-1",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "3-fulfillment-2",
         label: null,
-        value: "1"
+        value: "1",
       },
       {
         data: null,
         id: "3-fulfillment-3",
         label: null,
-        value: "1"
-      }
+        value: "1",
+      },
     ];
 
     const allFulfillmentLinesPriceSum = getAllFulfillmentLinesPriceSum(
       fulfillments,
-      refundedFulfilledProductQuantities
+      refundedFulfilledProductQuantities,
     );
 
     expect(allFulfillmentLinesPriceSum).toBe(34);
@@ -472,43 +472,43 @@ describe("Get get all fulfillment lines price sum", () => {
         data: null,
         id: "1-fulfillment-1",
         label: null,
-        value: "0"
+        value: "0",
       },
       {
         data: null,
         id: "2-fulfillment-1",
         label: null,
-        value: "2"
+        value: "2",
       },
       {
         data: null,
         id: "2-fulfillment-2",
         label: null,
-        value: "2"
+        value: "2",
       },
       {
         data: null,
         id: "3-fulfillment-1",
         label: null,
-        value: "4"
+        value: "4",
       },
       {
         data: null,
         id: "3-fulfillment-2",
         label: null,
-        value: "4"
+        value: "4",
       },
       {
         data: null,
         id: "3-fulfillment-3",
         label: null,
-        value: "4"
-      }
+        value: "4",
+      },
     ];
 
     const allFulfillmentLinesPriceSum = getAllFulfillmentLinesPriceSum(
       fulfillments,
-      refundedFulfilledProductQuantities
+      refundedFulfilledProductQuantities,
     );
 
     expect(allFulfillmentLinesPriceSum).toBe(72);
@@ -525,19 +525,25 @@ describe("Get the total value of all replaced products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
           quantityAvailable: 50,
           preorder: null,
           __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            isAvailableForPurchase: true,
+            id: "UHJvZHVjdDo1",
+          },
           stocks: [
             {
               id: "stock_test_id1",
@@ -545,11 +551,11 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -557,13 +563,13 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
-          ]
+              __typename: "Stock",
+            },
+          ],
         },
         productName: "Lake Tunes",
         productSku: "lake-tunes-mp3",
@@ -576,18 +582,18 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -596,21 +602,21 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
+        __typename: "OrderLine",
       },
       {
         id: "2",
@@ -619,13 +625,14 @@ describe("Get the total value of all replaced products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -638,11 +645,11 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -650,14 +657,19 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
+              __typename: "Stock",
+            },
           ],
-          __typename: "ProductVariant"
+          __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            id: "UHJvZHVjdDo1",
+            isAvailableForPurchase: true,
+          },
         },
         productName: "Lake Tunes",
         productSku: "lake-tunes-mp3",
@@ -670,18 +682,18 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -690,21 +702,21 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
+        __typename: "OrderLine",
       },
       {
         id: "3",
@@ -713,13 +725,14 @@ describe("Get the total value of all replaced products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6Mjg2",
@@ -732,11 +745,11 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -744,14 +757,19 @@ describe("Get the total value of all replaced products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
+              __typename: "Stock",
+            },
           ],
-          __typename: "ProductVariant"
+          __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            id: "UHJvZHVjdDo1",
+            isAvailableForPurchase: true,
+          },
         },
         productName: "T-shirt",
         productSku: "29810068",
@@ -764,18 +782,18 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -784,22 +802,22 @@ describe("Get the total value of all replaced products", () => {
           gross: {
             amount: 2.5,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 2.5,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleordemoproduct_cl_boot06_1-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
-      }
+        __typename: "OrderLine",
+      },
     ];
 
     const fulfilledLines: OrderDetailsFragment["fulfillments"][0]["lines"] = [
@@ -813,13 +831,14 @@ describe("Get the total value of all replaced products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -832,11 +851,11 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -844,14 +863,19 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -864,18 +888,18 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -884,23 +908,23 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "5",
@@ -912,13 +936,14 @@ describe("Get the total value of all replaced products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -931,11 +956,11 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -943,14 +968,19 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -963,18 +993,18 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -983,23 +1013,23 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "6",
@@ -1011,13 +1041,14 @@ describe("Get the total value of all replaced products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6Mjg2",
@@ -1030,11 +1061,11 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1042,14 +1073,19 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "T-shirt",
           productSku: "29810068",
@@ -1062,18 +1098,18 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1082,23 +1118,23 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleordemoproduct_cl_boot06_1-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "7",
@@ -1110,13 +1146,14 @@ describe("Get the total value of all replaced products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1129,11 +1166,11 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1141,14 +1178,19 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -1161,18 +1203,18 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1181,23 +1223,23 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "8",
@@ -1209,13 +1251,14 @@ describe("Get the total value of all replaced products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1228,11 +1271,11 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1240,14 +1283,19 @@ describe("Get the total value of all replaced products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -1260,18 +1308,18 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1280,24 +1328,24 @@ describe("Get the total value of all replaced products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
-      }
+        __typename: "FulfillmentLine",
+      },
     ];
 
     const unfulfilledItemsQuantities: FormsetData<LineItemData, number> = [
@@ -1305,20 +1353,20 @@ describe("Get the total value of all replaced products", () => {
         data: { isFulfillment: false, isRefunded: false },
         id: "1",
         label: null,
-        value: 0
+        value: 0,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "2",
         label: null,
-        value: 2
+        value: 2,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "3",
         label: null,
-        value: 1
-      }
+        value: 1,
+      },
     ];
 
     const fulfilledItemsQuantities: FormsetData<LineItemData, number> = [
@@ -1326,32 +1374,32 @@ describe("Get the total value of all replaced products", () => {
         data: { isFulfillment: true, isRefunded: false },
         id: "4",
         label: null,
-        value: 4
+        value: 4,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "5",
         label: null,
-        value: 0
+        value: 0,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "6",
         label: null,
-        value: 3
+        value: 3,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "7",
         label: null,
-        value: 4
+        value: 4,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "8",
         label: null,
-        value: 3
-      }
+        value: 3,
+      },
     ];
 
     const itemsToBeReplaced: FormsetData<LineItemData, boolean> = [
@@ -1359,50 +1407,50 @@ describe("Get the total value of all replaced products", () => {
         data: { isFulfillment: false, isRefunded: false },
         id: "1",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "2",
         label: null,
-        value: false
+        value: false,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "3",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "4",
         label: null,
-        value: false
+        value: false,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "5",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "6",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "7",
         label: null,
-        value: false
+        value: false,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "8",
         label: null,
-        value: true
-      }
+        value: true,
+      },
     ];
 
     const totalValue = getReplacedProductsAmount(
@@ -1417,15 +1465,15 @@ describe("Get the total value of all replaced products", () => {
             warehouse: null,
             trackingNumber: "",
             lines: fulfilledLines,
-            __typename: "Fulfillment"
-          }
-        ]
+            __typename: "Fulfillment",
+          },
+        ],
       },
       {
         itemsToBeReplaced,
         unfulfilledItemsQuantities,
-        fulfilledItemsQuantities
-      }
+        fulfilledItemsQuantities,
+      },
     );
 
     expect(totalValue).toBe(10);
@@ -1442,13 +1490,14 @@ describe("Get the total value of all selected products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1461,11 +1510,11 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -1473,14 +1522,19 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
+              __typename: "Stock",
+            },
           ],
-          __typename: "ProductVariant"
+          __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            id: "UHJvZHVjdDo1",
+            isAvailableForPurchase: true,
+          },
         },
         productName: "Lake Tunes",
         productSku: "lake-tunes-mp3",
@@ -1493,18 +1547,18 @@ describe("Get the total value of all selected products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -1513,21 +1567,21 @@ describe("Get the total value of all selected products", () => {
           gross: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
+        __typename: "OrderLine",
       },
       {
         id: "2",
@@ -1536,13 +1590,14 @@ describe("Get the total value of all selected products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1555,11 +1610,11 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -1567,14 +1622,19 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
+              __typename: "Stock",
+            },
           ],
-          __typename: "ProductVariant"
+          __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            id: "UHJvZHVjdDo1",
+            isAvailableForPurchase: true,
+          },
         },
         productName: "Lake Tunes",
         productSku: "lake-tunes-mp3",
@@ -1587,18 +1647,18 @@ describe("Get the total value of all selected products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -1607,21 +1667,21 @@ describe("Get the total value of all selected products", () => {
           gross: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 9.99,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
+        __typename: "OrderLine",
       },
       {
         id: "3",
@@ -1630,13 +1690,14 @@ describe("Get the total value of all selected products", () => {
           {
             id: "allocation_test_id",
             warehouse: {
+              name: "US Warehouse",
               id:
                 "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-              __typename: "Warehouse"
+              __typename: "Warehouse",
             },
             quantity: 1,
-            __typename: "Allocation"
-          }
+            __typename: "Allocation",
+          },
         ],
         variant: {
           id: "UHJvZHVjdFZhcmlhbnQ6Mjg2",
@@ -1649,11 +1710,11 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock1",
                 id:
                   "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
+              __typename: "Stock",
             },
             {
               id: "stock_test_id2",
@@ -1661,14 +1722,19 @@ describe("Get the total value of all selected products", () => {
                 name: "warehouse_stock2",
                 id:
                   "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 166,
               quantityAllocated: 0,
-              __typename: "Stock"
-            }
+              __typename: "Stock",
+            },
           ],
-          __typename: "ProductVariant"
+          __typename: "ProductVariant",
+          product: {
+            __typename: "Product",
+            id: "UHJvZHVjdDo1",
+            isAvailableForPurchase: true,
+          },
         },
         productName: "T-shirt",
         productSku: "29810068",
@@ -1681,18 +1747,18 @@ describe("Get the total value of all selected products", () => {
           gross: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           net: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
-          }
+            currency: "USD",
+          },
         },
         unitDiscount: {
           __typename: "Money",
           amount: 79.71,
-          currency: "USD"
+          currency: "USD",
         },
         unitDiscountReason: null,
         unitDiscountType: null,
@@ -1701,22 +1767,22 @@ describe("Get the total value of all selected products", () => {
           gross: {
             amount: 2.5,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
           net: {
             amount: 2.5,
             currency: "USD",
-            __typename: "Money"
+            __typename: "Money",
           },
-          __typename: "TaxedMoney"
+          __typename: "TaxedMoney",
         },
         thumbnail: {
           url:
             "http://localhost:8000/media/__sized__/products/saleordemoproduct_cl_boot06_1-thumbnail-255x255.png",
-          __typename: "Image"
+          __typename: "Image",
         },
-        __typename: "OrderLine"
-      }
+        __typename: "OrderLine",
+      },
     ];
 
     const fulfilledLines: OrderDetailsFragment["fulfillments"][0]["lines"] = [
@@ -1730,13 +1796,14 @@ describe("Get the total value of all selected products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1749,11 +1816,11 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1761,14 +1828,19 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -1781,18 +1853,18 @@ describe("Get the total value of all selected products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1801,23 +1873,23 @@ describe("Get the total value of all selected products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "5",
@@ -1829,13 +1901,14 @@ describe("Get the total value of all selected products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -1848,11 +1921,11 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1860,14 +1933,19 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -1880,18 +1958,18 @@ describe("Get the total value of all selected products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1900,23 +1978,23 @@ describe("Get the total value of all selected products", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "6",
@@ -1928,13 +2006,14 @@ describe("Get the total value of all selected products", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6Mjg2",
@@ -1947,11 +2026,11 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -1959,14 +2038,19 @@ describe("Get the total value of all selected products", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "T-shirt",
           productSku: "29810068",
@@ -1979,18 +2063,18 @@ describe("Get the total value of all selected products", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -1999,24 +2083,24 @@ describe("Get the total value of all selected products", () => {
             gross: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleordemoproduct_cl_boot06_1-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
-      }
+        __typename: "FulfillmentLine",
+      },
     ];
 
     const unfulfilledItemsQuantities: FormsetData<LineItemData, number> = [
@@ -2024,20 +2108,20 @@ describe("Get the total value of all selected products", () => {
         data: { isFulfillment: false, isRefunded: false },
         id: "1",
         label: null,
-        value: 0
+        value: 0,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "2",
         label: null,
-        value: 2
+        value: 2,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "3",
         label: null,
-        value: 1
-      }
+        value: 1,
+      },
     ];
 
     const fulfilledItemsQuantities: FormsetData<LineItemData, number> = [
@@ -2045,20 +2129,20 @@ describe("Get the total value of all selected products", () => {
         data: { isFulfillment: true, isRefunded: false },
         id: "4",
         label: null,
-        value: 4
+        value: 4,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "5",
         label: null,
-        value: 0
+        value: 0,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "6",
         label: null,
-        value: 3
-      }
+        value: 3,
+      },
     ];
 
     const waitingItemsQuantities: FormsetData<LineItemData, number> = [];
@@ -2068,50 +2152,50 @@ describe("Get the total value of all selected products", () => {
         data: { isFulfillment: false, isRefunded: false },
         id: "1",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "2",
         label: null,
-        value: false
+        value: false,
       },
       {
         data: { isFulfillment: false, isRefunded: false },
         id: "3",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "4",
         label: null,
-        value: false
+        value: false,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "5",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: false },
         id: "6",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "7",
         label: null,
-        value: true
+        value: true,
       },
       {
         data: { isFulfillment: true, isRefunded: true },
         id: "8",
         label: null,
-        value: true
-      }
+        value: true,
+      },
     ];
 
     const totalValue = getReturnSelectedProductsAmount(
@@ -2126,16 +2210,16 @@ describe("Get the total value of all selected products", () => {
             warehouse: null,
             trackingNumber: "",
             lines: fulfilledLines,
-            __typename: "Fulfillment"
-          }
-        ]
+            __typename: "Fulfillment",
+          },
+        ],
       },
       {
         itemsToBeReplaced,
         waitingItemsQuantities,
         unfulfilledItemsQuantities,
-        fulfilledItemsQuantities
-      }
+        fulfilledItemsQuantities,
+      },
     );
 
     expect(totalValue).toBe(59.94);
@@ -2155,13 +2239,14 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -2174,11 +2259,11 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -2186,14 +2271,19 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -2206,18 +2296,18 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -2226,23 +2316,23 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "RnVsZmlsbG1lbnRMaW5lOjMy",
@@ -2254,13 +2344,14 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6MzE3",
@@ -2273,11 +2364,11 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -2285,14 +2376,19 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "Lake Tunes",
           productSku: "lake-tunes-mp3",
@@ -2305,18 +2401,18 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -2325,23 +2421,23 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 9.99,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleor-digital-03_2-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
+        __typename: "FulfillmentLine",
       },
       {
         id: "RnVsZmlsbG1lbnRMaW5lOjMz",
@@ -2353,13 +2449,14 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             {
               id: "allocation_test_id",
               warehouse: {
+                name: "US Warehouse",
                 id:
                   "V2FyZWhvdXNlOjk1NWY0ZDk2LWRmNTAtNGY0Zi1hOTM4LWM5MTYzYTA4YTViNg==",
-                __typename: "Warehouse"
+                __typename: "Warehouse",
               },
               quantity: 1,
-              __typename: "Allocation"
-            }
+              __typename: "Allocation",
+            },
           ],
           variant: {
             id: "UHJvZHVjdFZhcmlhbnQ6Mjg2",
@@ -2372,11 +2469,11 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock1",
                   id:
                     "V2FyZWhvdXNlOjc4OGUyMGRlLTlmYTAtNDI5My1iZDk2LWUwM2RjY2RhMzc0ZQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
+                __typename: "Stock",
               },
               {
                 id: "stock_test_id2",
@@ -2384,14 +2481,19 @@ describe("Merge repeated order lines of fulfillment lines", () => {
                   name: "warehouse_stock2",
                   id:
                     "V2FyZWhvdXNlOjczYzI0OGNmLTliNzAtNDlmMi1hMDRlLTM4ZTYxMmQ5MDYwMQ==",
-                  __typename: "Warehouse"
+                  __typename: "Warehouse",
                 },
                 quantity: 166,
                 quantityAllocated: 0,
-                __typename: "Stock"
-              }
+                __typename: "Stock",
+              },
             ],
-            __typename: "ProductVariant"
+            __typename: "ProductVariant",
+            product: {
+              __typename: "Product",
+              id: "UHJvZHVjdDo1",
+              isAvailableForPurchase: true,
+            },
           },
           productName: "T-shirt",
           productSku: "29810068",
@@ -2404,18 +2506,18 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
+              currency: "USD",
             },
             net: {
               __typename: "Money",
               amount: 79.71,
-              currency: "USD"
-            }
+              currency: "USD",
+            },
           },
           unitDiscount: {
             __typename: "Money",
             amount: 79.71,
-            currency: "USD"
+            currency: "USD",
           },
           unitDiscountReason: null,
           unitDiscountType: null,
@@ -2424,24 +2526,24 @@ describe("Merge repeated order lines of fulfillment lines", () => {
             gross: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
             net: {
               amount: 2.5,
               currency: "USD",
-              __typename: "Money"
+              __typename: "Money",
             },
-            __typename: "TaxedMoney"
+            __typename: "TaxedMoney",
           },
           thumbnail: {
             url:
               "http://localhost:8000/media/__sized__/products/saleordemoproduct_cl_boot06_1-thumbnail-255x255.png",
-            __typename: "Image"
+            __typename: "Image",
           },
-          __typename: "OrderLine"
+          __typename: "OrderLine",
         },
-        __typename: "FulfillmentLine"
-      }
+        __typename: "FulfillmentLine",
+      },
     ];
 
     const mergedLines = mergeRepeatedOrderLines(lines);
@@ -2449,8 +2551,8 @@ describe("Merge repeated order lines of fulfillment lines", () => {
     expect(mergedLines).toHaveLength(2);
     expect(
       mergedLines.find(
-        fulfillmentLine => fulfillmentLine.orderLine.id === "T3JkZXJMaW5lOjQ1"
-      ).quantity
+        fulfillmentLine => fulfillmentLine.orderLine.id === "T3JkZXJMaW5lOjQ1",
+      ).quantity,
     ).toBe(2);
   });
 });

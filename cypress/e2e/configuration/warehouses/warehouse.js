@@ -10,37 +10,42 @@ import { WAREHOUSES_LIST } from "../../../elements/warehouses/warehouses-list";
 import {
   shippingZoneDetailsUrl,
   urlList,
-  warehouseDetailsUrl
+  warehouseDetailsUrl,
 } from "../../../fixtures/urlList";
-import { createShippingZone } from "../../../support/api/requests/ShippingMethod";
+import { updateChannelWarehouses } from "../../../support/api/requests/Channels";
+import {
+  createShippingZone,
+  createShippingZoneWithoutWarehouse,
+} from "../../../support/api/requests/ShippingMethod";
 import {
   createWarehouse as createWarehouseViaApi,
-  getWarehouse
+  getWarehouse,
 } from "../../../support/api/requests/Warehouse";
 import { getDefaultChannel } from "../../../support/api/utils/channelsUtils";
 import { deleteShippingStartsWith } from "../../../support/api/utils/shippingUtils";
-import filterTests from "../../../support/filterTests";
 
-filterTests({ definedTags: ["all"] }, () => {
-  describe("Warehouse settings", () => {
-    const startsWith = "CyWarehouse";
-    let usAddress;
-    let secondUsAddress;
+describe("As an admin I want to manage warehouses", () => {
+  const startsWith = "CyWarehouse";
+  let usAddress;
+  let secondUsAddress;
 
-    before(() => {
-      cy.clearSessionData().loginUserViaRequest();
-      deleteShippingStartsWith(startsWith);
-      cy.fixture("addresses").then(addresses => {
-        usAddress = addresses.usAddress;
-        secondUsAddress = addresses.secondUsAddress;
-      });
+  before(() => {
+    cy.clearSessionData().loginUserViaRequest();
+    deleteShippingStartsWith(startsWith);
+    cy.fixture("addresses").then(addresses => {
+      usAddress = addresses.usAddress;
+      secondUsAddress = addresses.secondUsAddress;
     });
+  });
 
-    beforeEach(() => {
-      cy.clearSessionData().loginUserViaRequest();
-    });
+  beforeEach(() => {
+    cy.clearSessionData().loginUserViaRequest();
+  });
 
-    it("should create warehouse", () => {
+  it(
+    "should be able to create warehouse. TC: SALEOR_1101",
+    { tags: ["@warehouse", "@allEnv", "@stable"] },
+    () => {
       const name = `${startsWith}${faker.datatype.number()}`;
       cy.visit(urlList.warehouses)
         .get(WAREHOUSES_LIST.createNewButton)
@@ -58,12 +63,16 @@ filterTests({ definedTags: ["all"] }, () => {
         })
         .then(warehouse => {
           const addressResp = warehouse.address;
-          chai.softExpect(warehouse.name).to.be.eq(name);
+          expect(warehouse.name).to.be.eq(name);
           cy.expectCorrectBasicAddress(addressResp, usAddress);
         });
-    });
+    },
+  );
 
-    it("should add warehouse to shipping zone", () => {
+  it(
+    "should be able to add warehouse to shipping zone. TC: SALEOR_1102",
+    { tags: ["@warehouse", "@allEnv", "@stable"] },
+    () => {
       const name = `${startsWith}${faker.datatype.number()}`;
       let defaultChannel;
       let warehouse;
@@ -72,21 +81,25 @@ filterTests({ definedTags: ["all"] }, () => {
       getDefaultChannel()
         .then(channelResp => {
           defaultChannel = channelResp;
+
           createWarehouseViaApi({
             name,
-            address: usAddress
+            address: usAddress,
           });
         })
         .then(warehouseResp => {
           warehouse = warehouseResp;
-          createShippingZone(name, "US", defaultChannel.id);
+
+          updateChannelWarehouses(defaultChannel.id, warehouse.id);
+          createShippingZoneWithoutWarehouse(name, "US", defaultChannel.id);
         })
         .then(shippingZoneResp => {
           shippingZone = shippingZoneResp;
+
           cy.visit(shippingZoneDetailsUrl(shippingZone.id))
             .fillAutocompleteSelect(
               SHIPPING_ZONE_DETAILS.warehouseSelector,
-              warehouse.name
+              warehouse.name,
             )
             .addAliasToGraphRequest("UpdateShippingZone")
             .get(BUTTON_SELECTORS.confirm)
@@ -96,16 +109,20 @@ filterTests({ definedTags: ["all"] }, () => {
         })
         .then(warehouseResp => {
           expect(warehouseResp.shippingZones.edges[0].node.id).to.be.eq(
-            shippingZone.id
+            shippingZone.id,
           );
         });
-    });
+    },
+  );
 
-    it("should delete warehouse", () => {
+  it(
+    "should be able to delete warehouse. TC: SALEOR_1103",
+    { tags: ["@warehouse", "@allEnv", "@stable"] },
+    () => {
       const name = `${startsWith}${faker.datatype.number()}`;
       createWarehouseViaApi({
         name,
-        address: usAddress
+        address: usAddress,
       }).then(warehouse => {
         cy.visit(warehouseDetailsUrl(warehouse.id))
           .get(BUTTON_SELECTORS.deleteButton)
@@ -116,9 +133,13 @@ filterTests({ definedTags: ["all"] }, () => {
           .waitForRequestAndCheckIfNoErrors("@WarehouseDelete");
         getWarehouse(warehouse.id).should("be.null");
       });
-    });
+    },
+  );
 
-    it("should remove warehouse from shipping zone", () => {
+  it(
+    "should be able to remove warehouse from shipping zone. TC: SALEOR_1104",
+    { tags: ["@warehouse", "@allEnv", "@stable"] },
+    () => {
       const name = `${startsWith}${faker.datatype.number()}`;
       let defaultChannel;
       let warehouse;
@@ -127,18 +148,20 @@ filterTests({ definedTags: ["all"] }, () => {
       getDefaultChannel()
         .then(channelResp => {
           defaultChannel = channelResp;
-          createShippingZone(name, "US", defaultChannel.id);
+
+          createWarehouseViaApi({
+            name,
+            address: usAddress,
+          }).then(warehouseResp => {
+            warehouse = warehouseResp;
+
+            updateChannelWarehouses(defaultChannel.id, warehouse.id);
+            createShippingZone(name, "US", defaultChannel.id, warehouse.id);
+          });
         })
         .then(shippingZoneResp => {
           shippingZone = shippingZoneResp;
-          createWarehouseViaApi({
-            name,
-            shippingZone: shippingZone.id,
-            address: usAddress
-          });
-        })
-        .then(warehouseResp => {
-          warehouse = warehouseResp;
+
           cy.visit(shippingZoneDetailsUrl(shippingZone.id))
             .get(SHIPPING_ZONE_DETAILS.removeWarehouseButton)
             .click()
@@ -146,21 +169,24 @@ filterTests({ definedTags: ["all"] }, () => {
             .get(BUTTON_SELECTORS.confirm)
             .click()
             .waitForRequestAndCheckIfNoErrors("@UpdateShippingZone");
-          getWarehouse(warehouse.id);
-        })
-        .then(warehouseResp => {
-          expect(warehouseResp.shippingZones.edges).to.be.empty;
+          getWarehouse(warehouse.id).then(warehouseResp => {
+            expect(warehouseResp.shippingZones.edges).to.be.empty;
+          });
         });
-    });
+    },
+  );
 
-    it("should update warehouse", () => {
+  it(
+    "should be able to update warehouse. TC: SALEOR_1105",
+    { tags: ["@warehouse", "@allEnv", "@stable"] },
+    () => {
       const name = `${startsWith}${faker.datatype.number()}`;
       const updatedName = `${startsWith}${faker.datatype.number()}`;
       let warehouse;
 
       createWarehouseViaApi({
         name,
-        address: usAddress
+        address: usAddress,
       })
         .then(warehouseResp => {
           warehouse = warehouseResp;
@@ -176,9 +202,9 @@ filterTests({ definedTags: ["all"] }, () => {
         })
         .then(warehouseResp => {
           const addressResp = warehouseResp.address;
-          chai.softExpect(warehouseResp.name).to.be.eq(updatedName);
+          expect(warehouseResp.name).to.be.eq(updatedName);
           cy.expectCorrectBasicAddress(addressResp, secondUsAddress);
         });
-    });
-  });
+    },
+  );
 });
